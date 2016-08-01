@@ -1,0 +1,29 @@
+{
+	"window": {
+		"size": [600, 400],
+		"title": "My Game",
+		"background_color": [0, 153, 0]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "./img/cards/",
+		"back_sprite_file": "./img/back-side.png",
+		"move_speed": 50
+	},
+	"deck": {
+		"offset": [1, 1]
+	},
+	"heap": {
+		"offset": [10, 10]
+	},
+	"player": {
+		"player_talon_offset": [-10, 0],
+		"player_card_offset_small": [6, 0],
+		"player_card_offset_large": [12, 0],
+		"player_window_margin": 10
+	},
+	"gui": {
+   		"done_button": [505, 365, 50, 25],
+		"notification_label": [440, 10]
+	}
+}
