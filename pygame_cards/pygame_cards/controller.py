@@ -18,6 +18,19 @@ class Controller:
             self.objects = objects_list
         self.gui_interface = gui_interface
         self.started = False
+        self.build_custom_objects()
+        # self.grabbed_card = None
+        # self.grabbed_card_holder = None
+
+    def build_custom_objects(self):
+        """ Should be implemented in derived classes, if needed. Builds custom game objects."""
+        pass
+
+    @abc.abstractmethod
+    def start_game(self):
+        """ Should be implemented in derived classed.
+        Creates game objects and initializes the game (deal cards etc.)"""
+        pass
 
     @abc.abstractmethod
     def execute_game(self):
@@ -30,7 +43,7 @@ class Controller:
         pass
 
     @abc.abstractmethod
-    def process_mouse_events(self, pos, down):
+    def process_mouse_event(self, pos, down):
         """ Should be implemented in derived classes.
         :param pos: tuple with mouse coordinates (x, y)
         :param down: boolean, True for mouse down event, False for mouse up event
@@ -44,11 +57,14 @@ class Controller:
         if self.objects is not None:
             for obj in self.objects:
                 # TODO: add check is instance of GameObject class
-                obj.render(screen)
+                obj.render_all(screen)
 
     def add_object(self, obj):
         # TODO: uncomment isinstance check
         #if isinstance(obj, GameObject):
         if self.objects is None:
             self.objects = []
-        self.objects.append(obj)
+        if isinstance(obj, tuple):
+            self.objects.extend(obj)
+        else:
+            self.objects.append(obj)

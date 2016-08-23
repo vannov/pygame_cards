@@ -165,7 +165,6 @@ class PidrGameController(AbstractGameController):
                                            (0 - globals.settings_json["card"]["size"][0], 0 - globals.settings_json["card"]["size"][1]),
                                            speed=150))
 
-
     def process_card_drop(self, pos):
         #TODO: check if has to move current top card
         if self.deck.grabbed_card:

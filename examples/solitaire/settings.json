@@ -1,6 +1,6 @@
 {
 	"window": {
-		"size": [600, 400],
+		"size": [570, 400],
 		"title": "Solitaire",
 		"background_color": [0, 153, 0]
 	},
@@ -11,11 +11,23 @@
 		"move_speed": 50
 	},
 	"deck": {
-		"offset": [1, 1]
+		"position": [10, 10],
+		"offset": [0.2, 0]
 	},
-	"heap": {
-		"offset": [10, 10]
+    "stack": {
+        "deck_offset": [15, 0],
+        "inner_offset": [20, 0]
+    },
+	"pile": {
+        "position": [10, 120],
+        "offset": [80, 0],
+		"inner_offset": [0, 20]
 	},
+    "foundation": {
+        "position": [250, 10],
+        "offset": [80, 0],
+		"inner_offset": [0, 0]
+    },
     "gui": {
         "done_button": [505, 365, 50, 25],
         "notification_label": [440, 10]

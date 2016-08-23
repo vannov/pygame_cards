@@ -9,7 +9,7 @@ try:
 
     import gui
 
-    from pygame_cards import globals
+    from pygame_cards import globals, controller
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
@@ -88,7 +88,7 @@ class GameApp:
         self.render_thread = RenderThread(self)
         self.stopped = False
         self.gui_interface = None
-        self.game_controller = None
+        self.game_controller = self.build_game_controller()
 
     def process_events(self):
         """ Processes mouse events and quit event """
@@ -134,16 +134,20 @@ class GameApp:
         pass
 
     @abc.abstractmethod
-    def process_mouse_event(self, down):
-        """ Abstract method for processing mouse events, should be overloaded in derived classes
-        :param down: boolean, True for mouse down event, False for mouse up event
+    def build_game_controller(self):
+        """ Abstract method to build game controller. Should be defined in derived classes.
+        :return: instance of class derived from controller.GameController
         """
         pass
 
-    @abc.abstractmethod
-    def build_game_objects(self):
-        """ Abstract method to build game object. Should be defined in derived classes. """
-        pass
+    def process_mouse_event(self, down):
+        """ Processes mouse events, invoke mouse events handlers in game_controller and gui_interfaces
+        :param down: boolean, True for mouse down event, False for mouse up event
+        """
+        if self.gui_interface is not None:
+            self.gui_interface.check_mouse(down)
+        if self.game_controller is not None:
+            self.game_controller.process_mouse_event(pygame.mouse.get_pos(), down)
 
     def init_gui(self):
         """ Initializes GUI elements from "gui" structure from settings.json """
@@ -152,7 +156,7 @@ class GameApp:
     def init_game(self):
         """ Initializes game and gui objects """
         self.init_gui()
-        self.build_game_objects()
+        self.game_controller.start_game()
 
     def render(self):
         """ Renders game objects and gui elements """

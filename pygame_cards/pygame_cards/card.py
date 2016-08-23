@@ -2,15 +2,17 @@
 try:
     import sys
     from pygame_cards import card_sprite
+    from pygame_cards import game_object
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
 
 
-class Card:
+class Card(game_object.GameObject):
     """ This class represents a card. """
 
-    def __init__(self, suit, rank, pos, back_up = False):
+    def __init__(self, suit, rank, pos, back_up=False):
+        game_object.GameObject.__init__(self)
         self.suit = suit
         self.rank = rank
         self.sprite = card_sprite.CardSprite(suit, rank, pos, back_up)
@@ -36,6 +38,16 @@ class Card:
         """ Flips the card from face-up to face-down and vice versa """
         self.back_up = not self.back_up
         self.sprite.flip()
+
+    def is_clicked(self, pos):
+        """ Checks if mouse click is on card
+        :param pos: tuple with coordinates of mouse click (x, y)
+        :return: True if card is clicked, False otherwise
+        """
+        return self.sprite.is_clicked(pos)
+
+    def unclick(self):
+        self.sprite.clicked = False
 
     def check_mouse(self, pos, down):
         """ Checks if mouse event affects the card and if so processes the event.

@@ -35,6 +35,13 @@ class DeckType(IntEnum):
     full = 52
 
 
+class GrabPolicy(IntEnum):
+    """ Enums for different grab policies of cards' holders."""
+    no_grab = 0,
+    can_single_grab = 1,
+    can_multi_grab = 2
+
+
 def get_suit_string_from_enum(suit):
     """ Returns unicode character of a card suit
     :param suit: int value that corresponds to one of enums from Suit class

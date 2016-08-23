@@ -84,10 +84,12 @@ class AbstractPygameCardSprite(AbstractCardSprite, object):
         else:
             return self.image, (self.rect[0], self.rect[1])
 
+    def is_clicked(self, p):
+        return p[0] > self.rect[0] and p[0] < (self.rect[0] + self.get_rect()[2]) and\
+                p[1] > self.rect[1] and p[1] < (self.rect[1] + self.get_rect()[3])
+
     def check_mouse(self, p, down):
-        logging.debug('check_mouse', p, down)
-        if (p[0] > self.rect[0] and p[0] < (self.rect[0] + self.get_rect()[2]) and
-            p[1] > self.rect[1] and p[1] < (self.rect[1] + self.get_rect()[3])):
+        if self.is_clicked(p):
             if isinstance(down, bool):
                 self.clicked = down
             self.mouse_offset[0] = p[0] - self.rect[0]
