@@ -74,6 +74,7 @@ class AbstractCardsHolder(game_object.GameObject):
 
                 if index != -1:
                     grabbed_cards = [c for c in self.cards if self.cards.index(c) >= index]
+                    grabbed_cards.reverse()
                     self.cards[:] = [c for c in self.cards if self.cards.index(c) < index]
         return grabbed_cards
 
@@ -114,16 +115,28 @@ class AbstractCardsHolder(game_object.GameObject):
                 self.cards.insert(0, card_)
                 self.update_position(self.offset)
 
-    def pop_top_card(self):
-        """ Removes top card from the list and returns it.
-        If there are no cards left, returns None.
-        """
+    def pop_card(self, top):
         if len(self.cards) == 0:
             return None
         else:
             if len(self.cards) == 1 and self.last_card_callback is not None:
                 self.last_card_callback(self.cards[0])
-            return self.cards.pop()
+            if top:
+                return self.cards.pop()
+            else:
+                return self.cards.pop(0)
+
+    def pop_top_card(self):
+        """ Removes top card from the list and returns it.
+        If there are no cards left, returns None.
+        """
+        return self.pop_card(top=True)
+
+    def pop_bottom_card(self):
+        """ Removes last card from the list and returns it.
+        If there are no cards left, returns None.
+        """
+        return self.pop_card(top=False)
 
     def drop_card(self):
         """ Drops grabbed card."""
