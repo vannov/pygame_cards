@@ -29,7 +29,7 @@
 		"inner_offset": [0, 0]
     },
     "gui": {
-        "done_button": [505, 365, 50, 25],
+        "restart_button": [10, 365, 50, 25],
         "notification_label": [440, 10]
     }
 }

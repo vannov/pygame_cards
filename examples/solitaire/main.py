@@ -13,27 +13,29 @@ except ImportError as err:
 
 class SolitaireController(controller.Controller):
 
+    def restart_game(self):
+        self.deck_discard.move_all_cards(self.deck)
+        self.stack.move_all_cards(self.deck)
+
+        for f in self.foundations:
+            f.move_all_cards(self.deck)
+
+        for p in self.piles:
+            p.move_all_cards(self.deck)
+
+        self.start_game()
+
     def start_game(self):
+
         self.deck.shuffle()
         #self.deal_cards()
 
-        pile_pos = globals.settings_json["pile"]["position"]
-        pile_offset = globals.settings_json["pile"]["offset"]
-        pile_inner_offset = globals.settings_json["pile"]["inner_offset"]
         for i in range(1, 8):
-            pile = holders.Pile(pile_pos, pile_inner_offset, enums.GrabPolicy.can_multi_grab)
             for j in range(0, i):
                 card_ = self.deck.pop_top_card()
                 if j == i - 1:
                     card_.flip()
-                pile.add_card(card_)
-            self.add_object(pile)
-            self.piles.append(pile)
-            pile_pos = pile_pos[0] + pile_offset[0], pile_pos[1] + pile_offset[1]
-
-        self.grabbed_cards_holder = holders.GrabbedCardsHolder((0, 0), pile_inner_offset)
-        self.add_object(self.grabbed_cards_holder)
-        self.owner_of_grabbed_card = None
+                self.piles[i-1].add_card(card_)
 
     def build_custom_objects(self):
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
@@ -62,16 +64,33 @@ class SolitaireController(controller.Controller):
             self.add_object(self.foundations[i])
 
         self.add_object((self.deck, self.stack))
+
         self.piles = []
+        pile_pos = globals.settings_json["pile"]["position"]
+        pile_offset = globals.settings_json["pile"]["offset"]
+        pile_inner_offset = globals.settings_json["pile"]["inner_offset"]
+        for i in range(1, 8):
+            pile = holders.Pile(pile_pos, pile_inner_offset, enums.GrabPolicy.can_multi_grab)
+            pile_pos = pile_pos[0] + pile_offset[0], pile_pos[1] + pile_offset[1]
+            self.add_object(pile)
+            self.piles.append(pile)
+
+        self.grabbed_cards_holder = holders.GrabbedCardsHolder((0, 0), pile_inner_offset)
+        self.add_object(self.grabbed_cards_holder)
+        self.owner_of_grabbed_card = None
+
+        self.gui_interface.show_button(globals.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
 
     def execute_game(self):
         pass
 
-    def process_mouse_event(self, pos, down):
+    def process_mouse_event(self, pos, down, double_click=False):
         if down:
             self.process_mouse_down(pos)
         else:
             self.process_mouse_up(pos)
+        if double_click:
+            self.process_double_click(pos)
 
     def process_mouse_down(self, pos):
         if self.deck.is_clicked(pos):
@@ -91,12 +110,13 @@ class SolitaireController(controller.Controller):
         if len(self.grabbed_cards_holder.cards) > 0:
             for obj in self.objects:
                 dropped_cards = False
-                if hasattr(obj, "can_drop_card") and obj.is_clicked(pos) and \
-                        obj.can_drop_card(self.grabbed_cards_holder.cards[0]):
-                    dropped_cards = True
-                    while len(self.grabbed_cards_holder.cards) != 0:
-                        obj.add_card(self.grabbed_cards_holder.pop_bottom_card())
-                    break
+                if hasattr(obj, "can_drop_card") and hasattr(obj, "check_collide"):
+                    if obj.check_collide(self.grabbed_cards_holder.cards[0]) and \
+                            obj.can_drop_card(self.grabbed_cards_holder.cards[0]):
+                        dropped_cards = True
+                        while len(self.grabbed_cards_holder.cards) != 0:
+                            obj.add_card(self.grabbed_cards_holder.pop_bottom_card())
+                        break
             if self.owner_of_grabbed_card is not None:
                 while len(self.grabbed_cards_holder.cards) != 0:
                     self.owner_of_grabbed_card.add_card(self.grabbed_cards_holder.pop_bottom_card())
@@ -115,8 +135,7 @@ class SolitaireController(controller.Controller):
             if len(self.deck_discard.cards) == 0:
                 return  # Cards in Deck ended
             else:
-                while len(self.deck_discard.cards) != 0:
-                    self.deck.add_card(self.deck_discard.pop_top_card())
+                self.deck_discard.move_all_cards(self.deck)
                 return  # Not drawing cards to stack when flipped the deck
 
         for i in range(0, 3):
@@ -126,20 +145,24 @@ class SolitaireController(controller.Controller):
             card_.flip()
             self.stack.add_card(card_)
 
-
-class SolitaireApp(game_app.GameApp):
-    """ Class the represents Solitaire application """
-
-    def load_game_settings_from_json(self):
-        pass
-
-    def build_game_controller(self):
-        return SolitaireController()
+    def process_double_click(self, pos):
+        search_list = self.piles + [self.stack]
+        for holder in search_list:
+            if len(holder.cards) != 0 and holder.is_clicked(pos):
+                c = holder.cards[-1]
+                for found in self.foundations:
+                    if found.can_drop_card(c):
+                        found.add_card(holder.pop_top_card())
+                        if isinstance(holder, holders.Pile):
+                            holder.open_top_card()
+                        break
+                break
 
 
 def main():
     json_path = os.path.join(os.getcwd(), 'settings.json')
-    solitaire_app = SolitaireApp(json_path)
+    solitaire_app = game_app.GameApp(json_path)
+    solitaire_app.game_controller = SolitaireController(gui_interface=solitaire_app.gui_interface) # TODO: revisit gui_interface ownership
     solitaire_app.execute()
 
 if __name__ == '__main__':

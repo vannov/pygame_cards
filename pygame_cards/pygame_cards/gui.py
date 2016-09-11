@@ -27,7 +27,7 @@ class Button(AbstractGUI):
     text_pressed_color = (255, 255, 255)
     text_margin = (3, 3)
 
-    def __init__(self, screen, rect, onclick, text = ""):
+    def __init__(self, screen, rect, onclick, text=""):
         self.screen = screen
         self.text = text
         self.onclick = onclick

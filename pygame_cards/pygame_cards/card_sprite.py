@@ -39,7 +39,7 @@ class AbstractCardSprite(pygame.sprite.Sprite):
         pass
 
     @abc.abstractmethod
-    def check_collide(self, sprite):
+    def check_card_collide(self, sprite):
         pass
 
 
@@ -98,8 +98,12 @@ class AbstractPygameCardSprite(AbstractCardSprite, object):
         else:
             return False
 
-    def check_collide(self, sprite):
+    def check_card_collide(self, sprite):
         return self.rect.colliderect(sprite.rect)
+
+    def check_area_collide(self, pos):
+        rect = pygame.Rect((pos[0], pos[1], self.rect[2], self.rect[3]))
+        return self.rect.colliderect(rect)
 
 
 class CardSprite(AbstractPygameCardSprite):

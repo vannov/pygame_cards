@@ -54,15 +54,21 @@ class Card(game_object.GameObject):
         :param pos: tuple with coordinates of mouse event (x, y)
         :param down: boolean, should be True for mouse down event, False for mouse up event
         :return: True if passed mouse event affects the card, False otherwise.
+
         """
         return self.sprite.check_mouse(pos, down)
 
-    def check_collide(self, card):
-        """ Checks if current card's sprite collides with other card's sprite
-        :param card: Card object to check collision with
-        :return: True if cards collide, False otherwise
+    def check_collide(self, card_=None, pos=None):
+        """ Checks if current card's sprite collides with other card's sprite, or with an rectangular area with size
+        of a card. Parameters card and pos are mutually exclusive.
+        :param card_: Card object to check collision with
+        :param pos: tuple with coordinates (x,y) - top left corner of area to check collision with
+        :return: True if cards/card and area collide, False otherwise
         """
-        return self.sprite.check_collide(card.sprite)
+        if card_ is not None:
+            return self.sprite.check_card_collide(card_.sprite)
+        elif pos is not None:
+            return self.sprite.check_area_collide(pos)
 
     def set_pos(self, pos):
         """ Sets position of the card's sprite

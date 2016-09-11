@@ -39,17 +39,16 @@ class GameApp:
 
     class GuiInterface:
         """ Inner class with GUI interface functions """
-        def __init__(self, gui_json, screen):
-            self.gui_json = gui_json
+        def __init__(self, screen):
             self.screen = screen
             self.gui_list = []
 
-        def show_label(self, text):
-            label = gui.Title(self.screen, self.gui_json['notification_label'], text)
+        def show_label(self, position, text):
+            label = gui.Title(self.screen, position, text)
             self.gui_list.append(label)
 
-        def show_button(self, text, callback):
-            self.gui_list.append(gui.Button(self.screen, self.gui_json['done_button'], callback, text))
+        def show_button(self, rectangle, text, callback):
+            self.gui_list.append(gui.Button(self.screen, rectangle, callback, text))
 
         def hide_button(self):
             pass
@@ -57,7 +56,6 @@ class GameApp:
         def render(self):
             for g in self.gui_list:
                 if hasattr(g, 'expired') and g.expired:
-                        print 'removing g from gui_list'
                         self.gui_list.remove(g)
                         continue
                 g.render()
@@ -66,7 +64,10 @@ class GameApp:
             for g in self.gui_list:
                 g.check_mouse(pygame.mouse.get_pos(), down)
 
-    def __init__(self, json_name):
+        def clean(self):
+            self.gui_list = []
+
+    def __init__(self, json_name, controller=None):
         """
         :param json_name: path to configuration json file
         """
@@ -87,8 +88,22 @@ class GameApp:
         self.clock = pygame.time.Clock()
         self.render_thread = RenderThread(self)
         self.stopped = False
-        self.gui_interface = None
-        self.game_controller = self.build_game_controller()
+        self.gui_interface = GameApp.GuiInterface(self.screen)
+        self.mouse_timestamp = None  # Used for double click calculation
+        #self.game_controller = controller
+        #self.game_controller.gui_interface = self.gui_interface
+
+    def is_double_click(self):
+        if self.mouse_timestamp is None:
+            self.mouse_timestamp = pygame.time.get_ticks()
+            return False
+        else:
+            now = pygame.time.get_ticks()
+            diff = now - self.mouse_timestamp
+            self.mouse_timestamp = now
+            if diff < 200:
+                return True
+        return False
 
     def process_events(self):
         """ Processes mouse events and quit event """
@@ -98,7 +113,7 @@ class GameApp:
                 self.render_thread.join()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.process_mouse_event(False)
+                self.process_mouse_event(False, self.is_double_click())
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.process_mouse_event(True)
 
@@ -123,39 +138,24 @@ class GameApp:
         self.background_color = globals.settings_json["window"]['background_color']
         self.size = globals.settings_json["window"]["size"]
 
-        # Following method should be overloaded in derived classes
-        self.load_game_settings_from_json()
+    # @abc.abstractmethod
+    # def init_gui(self):
+    #     """ Initializes default GUI elements. Should be overloaded in derived classes. """
+    #     pass
 
-    @abc.abstractmethod
-    def load_game_settings_from_json(self):
-        """ Loads custom game settings from settings.json.
-            Should be overloaded in derived classes.
-        """
-        pass
-
-    @abc.abstractmethod
-    def build_game_controller(self):
-        """ Abstract method to build game controller. Should be defined in derived classes.
-        :return: instance of class derived from controller.GameController
-        """
-        pass
-
-    def process_mouse_event(self, down):
+    def process_mouse_event(self, down, double_click=False):
         """ Processes mouse events, invoke mouse events handlers in game_controller and gui_interfaces
         :param down: boolean, True for mouse down event, False for mouse up event
+        :param double_click: boolean, True if it's a double click event
         """
         if self.gui_interface is not None:
             self.gui_interface.check_mouse(down)
         if self.game_controller is not None:
-            self.game_controller.process_mouse_event(pygame.mouse.get_pos(), down)
-
-    def init_gui(self):
-        """ Initializes GUI elements from "gui" structure from settings.json """
-        self.gui_interface = GameApp.GuiInterface(globals.settings_json["gui"], self.screen)
+            self.game_controller.process_mouse_event(pygame.mouse.get_pos(), down, double_click)
 
     def init_game(self):
         """ Initializes game and gui objects """
-        self.init_gui()
+        #self.init_gui()
         self.game_controller.start_game()
 
     def render(self):

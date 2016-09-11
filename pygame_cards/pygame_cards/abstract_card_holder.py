@@ -154,6 +154,19 @@ class AbstractCardsHolder(game_object.GameObject):
         """
         self.cards.sort(key=operator.attrgetter('suit', 'rank'))
 
+    def move_all_cards(self, other, back_side_up=True):
+        """ Moves all cards to other cards holder.
+        :param other: instance of AbstractCardsHolder where cards will be moved.
+        :param back_side_up: boolean, True if cards should be flipped to back side up, False otherwise.
+        """
+        if isinstance(other, AbstractCardsHolder):
+            while len(self.cards) != 0:
+                card_ = self.pop_top_card()
+                if card_ is not None:
+                    if card_.back_up != back_side_up:
+                        card_.flip()
+                    other.add_card(card_)
+
     def update_position(self, offset):
         """ Updates position of all cards according to the offset passed
         :param offset: tuple (x, y) with values of offset for each card
@@ -162,6 +175,16 @@ class AbstractCardsHolder(game_object.GameObject):
         for card_ in self.cards:
             card_.set_pos(pos_)
             pos_ = pos_[0] + offset[0], pos_[1] + offset[1]
+
+    def check_collide(self, card_):
+        """ Checks if current cards holder collides with other card.
+        :param card_: Card object to check collision with
+        :return: True if card collides with holder, False otherwise
+        """
+        if len(self.cards) > 0:
+            return self.cards[-1].check_collide(card_=card_)
+        else:
+            return card_.check_collide(pos=self.pos)
 
     def render(self, screen):
         pass

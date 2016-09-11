@@ -23,12 +23,6 @@ class Foundation(abstract_card_holder.AbstractCardsHolder):
         else:
             return self.cards[-1].suit == card_.suit and card_.rank - self.cards[-1].rank == 1
 
-    def pop_top_card(self):
-        """ Overwrite pop_top_card() method of AbstractCardsHolder to restrict taking cards from a foundation.
-        :return: None
-        """
-        return None
-
     def render(self, screen):
         draw_empty_card_pocket(self, screen)
 
@@ -70,9 +64,9 @@ class GrabbedCardsHolder(abstract_card_holder.AbstractCardsHolder):
             #self.update_position(self.offset)
 
     def render(self, screen):
-        if len(self.cards) > 1:
+        if len(self.cards) > 0:
             self.pos = self.cards[0].get_sprite().pos
-        self.update_position(self.offset)
+            self.update_position(self.offset)
 
 
 class DeckDiscard(abstract_card_holder.AbstractCardsHolder):

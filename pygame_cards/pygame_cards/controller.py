@@ -43,10 +43,11 @@ class Controller:
         pass
 
     @abc.abstractmethod
-    def process_mouse_event(self, pos, down):
+    def process_mouse_event(self, pos, down, double_click=False):
         """ Should be implemented in derived classes.
         :param pos: tuple with mouse coordinates (x, y)
         :param down: boolean, True for mouse down event, False for mouse up event
+        :param double_click: boolean, True if it's a double click event
         """
         pass
 
@@ -68,3 +69,14 @@ class Controller:
             self.objects.extend(obj)
         else:
             self.objects.append(obj)
+
+    @abc.abstractmethod
+    def restart_game(self):
+        """ Cleans up all objects, rebuilds game object and calls start_game(). """
+        pass
+
+    # TODO: implement and uncomment decorator
+    #@abc.abstractmethod
+    def cleanup(self):
+        """ Cleans up game objects and gui when closing or restarting the game. """
+        pass
