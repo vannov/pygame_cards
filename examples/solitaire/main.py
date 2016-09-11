@@ -23,6 +23,9 @@ class SolitaireController(controller.Controller):
         for p in self.piles:
             p.move_all_cards(self.deck)
 
+        if isinstance(self.gui_interface, game_app.GameApp.GuiInterface):
+            self.gui_interface.hide_by_id("win_label1")
+            self.gui_interface.hide_by_id("win_label2")
         self.start_game()
 
     def start_game(self):
@@ -36,6 +39,8 @@ class SolitaireController(controller.Controller):
                 if j == i - 1:
                     card_.flip()
                 self.piles[i-1].add_card(card_)
+
+        self.game_start_time = pygame.time.get_ticks()
 
     def build_custom_objects(self):
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
@@ -81,6 +86,33 @@ class SolitaireController(controller.Controller):
 
         self.gui_interface.show_button(globals.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
 
+    def check_win(self):
+        win = True
+        for found in self.foundations:
+            if len(found.cards) > 0 and found.cards[-1].rank == enums.Rank.king:
+                continue
+            else:
+                win = False
+                break
+        if win:
+            self.show_win_ui()
+
+    def show_win_ui(self):
+        text = "You won, congrats!"
+        pos = globals.settings_json["gui"]["win_label"]
+        size = globals.settings_json["gui"]["win_text_size"]
+        self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0, id_="win_label1")
+        if hasattr(self, "game_start_time") and self.game_start_time is not None:
+            total_seconds = (pygame.time.get_ticks() - self.game_start_time)/1000
+            minutes = str(total_seconds / 60)
+            seconds = str(total_seconds % 60)
+            if len(seconds) == 1:
+                seconds = "0" + seconds
+            game_time = str(minutes) + ":" + str(seconds)
+            text = "Game time: " + str(game_time)
+            pos = pos[0], pos[1] + size
+            self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0, id_="win_label2")
+
     def execute_game(self):
         pass
 
@@ -120,8 +152,11 @@ class SolitaireController(controller.Controller):
             if self.owner_of_grabbed_card is not None:
                 while len(self.grabbed_cards_holder.cards) != 0:
                     self.owner_of_grabbed_card.add_card(self.grabbed_cards_holder.pop_bottom_card())
-                if dropped_cards and isinstance(self.owner_of_grabbed_card, holders.Pile):
-                    self.owner_of_grabbed_card.open_top_card()
+                if dropped_cards:
+                    if isinstance(self.owner_of_grabbed_card, holders.Pile):
+                        self.owner_of_grabbed_card.open_top_card()
+                    elif isinstance(self.owner_of_grabbed_card, holders.Foundation):
+                        self.check_win()
                 self.owner_of_grabbed_card = None
 
     def process_deck_click(self):
@@ -153,6 +188,7 @@ class SolitaireController(controller.Controller):
                 for found in self.foundations:
                     if found.can_drop_card(c):
                         found.add_card(holder.pop_top_card())
+                        self.check_win()
                         if isinstance(holder, holders.Pile):
                             holder.open_top_card()
                         break

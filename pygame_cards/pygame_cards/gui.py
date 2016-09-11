@@ -27,16 +27,17 @@ class Button(AbstractGUI):
     text_pressed_color = (255, 255, 255)
     text_margin = (3, 3)
 
-    def __init__(self, screen, rect, onclick, text=""):
+    def __init__(self, screen, rect, onclick, text="", text_size=15, color="black", id_=""):
         self.screen = screen
         self.text = text
         self.onclick = onclick
-        self.font = pygame.font.SysFont('arial', 15, bold=1)
+        self.font = pygame.font.SysFont('arial', text_size, bold=1)
         self.text_surface = self.font.render(self.text, True, Button.text_color)
         text_size = self.font.size(self.text)
         self.rect = (rect[0], rect[1], text_size[0] + 2 * Button.text_margin[0], text_size[1] + 2 * Button.text_margin[1])
         self.text_pos = self.rect[0] + (self.rect[2] - text_size[0])/2, self.rect[1] + (self.rect[3] - text_size[1])/2
         self.pressed = False
+        self.id = id_
 
     def render(self):
         if self.pressed:
@@ -59,15 +60,16 @@ class Button(AbstractGUI):
 
 
 class Title(AbstractGUI):
-    def __init__(self, screen, pos, text="", timeout=3):
+    def __init__(self, screen, pos, text="", text_size=15, color="black", timeout=3, id_=""):
         self.text = text
-        self.font = pygame.font.SysFont('arial', 15, bold=1)
+        self.font = pygame.font.SysFont('arial', text_size, bold=1)
         self.pos = pos
         self.screen = screen
         self.expired = False
         if timeout != 0:
             self.timer = Timer(timeout, self.expire)
             self.timer.start()
+        self.id = id_
 
     def expire(self):
         self.expired = True

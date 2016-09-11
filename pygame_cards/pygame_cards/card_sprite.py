@@ -16,9 +16,13 @@ except ImportError as err:
 
 
 def load_img(path):
-    directory = os.path.dirname(__file__)
-    return os.path.join(directory, path)
-
+    if __debug__:
+        # In debug mode use full file path
+        directory = os.path.dirname(__file__)
+        return os.path.join(directory, path)
+    else:
+    # In production environment use relative path from json
+        return path
 
 class AbstractCardSprite(pygame.sprite.Sprite):
     """ Abstract base class for Card sprite classes.

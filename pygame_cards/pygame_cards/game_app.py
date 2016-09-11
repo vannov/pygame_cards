@@ -43,15 +43,21 @@ class GameApp:
             self.screen = screen
             self.gui_list = []
 
-        def show_label(self, position, text):
-            label = gui.Title(self.screen, position, text)
+        def show_label(self, position, text, text_size=15, color="black", timeout=3, id_=""):
+            label = gui.Title(self.screen, position, text, text_size, color, timeout, id_)
             self.gui_list.append(label)
+            return label
 
-        def show_button(self, rectangle, text, callback):
-            self.gui_list.append(gui.Button(self.screen, rectangle, callback, text))
+        def show_button(self, rectangle, text, callback, text_size=15, color="black", id_=""):
+            button = gui.Button(self.screen, rectangle, callback, text, text_size, color, id_)
+            self.gui_list.append(button)
+            return button
 
-        def hide_button(self):
-            pass
+        def hide_by_id(self, id_):
+            for g in self.gui_list:
+                if hasattr(g, "id") and g.id == id_:
+                    self.gui_list.remove(g)
+                    break
 
         def render(self):
             for g in self.gui_list:
