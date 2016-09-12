@@ -18,10 +18,8 @@ class Controller:
             self.objects = objects_list
         self.gui_interface = gui_interface
         self.started = False
-        self.build_custom_objects()
-        # self.grabbed_card = None
-        # self.grabbed_card_holder = None
 
+    @abc.abstractmethod
     def build_custom_objects(self):
         """ Should be implemented in derived classes, if needed. Builds custom game objects."""
         pass

@@ -73,16 +73,16 @@ class GameApp:
         def clean(self):
             self.gui_list = []
 
-    def __init__(self, json_name, controller=None):
+    def __init__(self, json_path, game_controller=None):
         """
-        :param json_name: path to configuration json file
+        :param json_path: path to configuration json file
         """
         # Windows properties that will be set in load_settings_from_json()
         self.title = None
         self.background_color = None
         self.size = None
 
-        globals.settings_json = self.load_json(json_name)
+        globals.settings_json = self.load_json(json_path)
         if globals.settings_json is None:
             raise ValueError('settings json file is not loaded', 'GameApp.__init__')
         self.load_settings_from_json()
@@ -94,10 +94,12 @@ class GameApp:
         self.clock = pygame.time.Clock()
         self.render_thread = RenderThread(self)
         self.stopped = False
-        self.gui_interface = GameApp.GuiInterface(self.screen)
         self.mouse_timestamp = None  # Used for double click calculation
-        #self.game_controller = controller
-        #self.game_controller.gui_interface = self.gui_interface
+        self.gui_interface = GameApp.GuiInterface(self.screen)
+        if isinstance(game_controller, controller.Controller):
+            self.game_controller = game_controller
+            self.game_controller.gui_interface = self.gui_interface
+            self.game_controller.build_custom_objects()
 
     def is_double_click(self):
         if self.mouse_timestamp is None:

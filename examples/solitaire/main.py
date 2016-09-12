@@ -197,8 +197,7 @@ class SolitaireController(controller.Controller):
 
 def main():
     json_path = os.path.join(os.getcwd(), 'settings.json')
-    solitaire_app = game_app.GameApp(json_path)
-    solitaire_app.game_controller = SolitaireController(gui_interface=solitaire_app.gui_interface) # TODO: revisit gui_interface ownership
+    solitaire_app = game_app.GameApp(json_path=json_path, game_controller=SolitaireController())
     solitaire_app.execute()
 
 if __name__ == '__main__':
