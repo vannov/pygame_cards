@@ -1,0 +1,24 @@
+{
+	"window": {
+		"size": [680, 400],
+		"title": "My Game",
+		"background_color": [0, 153, 0]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "img/cards/",
+		"back_sprite_file": "img/back-side.png",
+		"move_speed": 50
+	},
+	"deck": {
+		"position": [10, 10],
+		"offset": [0.2, 0]
+	},
+	"stack": {
+        "position": [90, 10],
+        "offset": [15, 0]
+    },
+    "gui": {
+        "restart_button": [10, 360, 50, 25]
+    }
+}

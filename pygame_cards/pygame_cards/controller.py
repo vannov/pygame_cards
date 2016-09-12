@@ -49,6 +49,18 @@ class Controller:
         """
         pass
 
+    @abc.abstractmethod
+    def restart_game(self):
+        """ Cleans up all objects, rebuilds game object and calls start_game(). """
+        pass
+
+    # TODO: implement and uncomment decorator
+    #@abc.abstractmethod
+    def cleanup(self):
+        """ Cleans up game objects and gui when closing or restarting the game. """
+        pass
+
+
     def render_objects(self, screen):
         """ Renders game objects.
         :param screen: Screen to render objects on.
@@ -67,14 +79,3 @@ class Controller:
             self.objects.extend(obj)
         else:
             self.objects.append(obj)
-
-    @abc.abstractmethod
-    def restart_game(self):
-        """ Cleans up all objects, rebuilds game object and calls start_game(). """
-        pass
-
-    # TODO: implement and uncomment decorator
-    #@abc.abstractmethod
-    def cleanup(self):
-        """ Cleans up game objects and gui when closing or restarting the game. """
-        pass
