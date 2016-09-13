@@ -99,7 +99,7 @@ class GameApp:
         if isinstance(game_controller, controller.Controller):
             self.game_controller = game_controller
             self.game_controller.gui_interface = self.gui_interface
-            self.game_controller.build_custom_objects()
+            self.game_controller.build_objects()
 
     def is_double_click(self):
         if self.mouse_timestamp is None:
@@ -119,6 +119,7 @@ class GameApp:
             if event.type == pygame.QUIT:
                 self.stopped = True
                 self.render_thread.join()
+                self.game_controller.cleanup()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.process_mouse_event(False, self.is_double_click())

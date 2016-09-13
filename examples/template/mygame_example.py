@@ -25,13 +25,28 @@ class MyGameController(controller.Controller):
         """ Create permanent game objects (deck of cards, players etc.) and GUI elements in this method.
             This method is executed during creation of GameApp object.
         """
-        pass
+
+        deck_pos = globals.settings_json["deck"]["position"]
+        deck_offset = globals.settings_json["deck"]["offset"]
+        self.deck = deck.Deck(type_=enums.DeckType.short, pos=deck_pos, offset=deck_offset)
+
+        stack_pos = globals.settings_json["stack"]["position"]
+        stack_offset = globals.settings_json["stack"]["offset"]
+        self.stack = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
+
+        # All game objects should be added to self objects list with add_object method in order to be rendered.
+        self.add_object((self.deck, self.stack))
+
+        # Create Restart button
+        self.gui_interface.show_button(globals.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
 
     def start_game(self):
         """ Put game initialization code here. For example: dealing of cards, initialization of game timer etc.
             This method is triggered by GameApp.execute().
         """
-        pass
+
+        # Shuffle cards in the deck
+        self.deck.shuffle()
 
     def process_mouse_event(self, pos, down, double_click):
         """ Put code that handles mouse events here. For example: grab card from a deck on mouse down event,
@@ -41,14 +56,19 @@ class MyGameController(controller.Controller):
             :param down: boolean, True for mouse down event, False for mouse up event
             :param double_click: boolean, True if it's a double click event
         """
-        pass
+        if down and self.deck.is_clicked(pos):
+            card_ = self.deck.pop_top_card()
+            if isinstance(card_, card.Card):
+                card_.flip()
+                self.stack.add_card(card_)
 
     def restart_game(self):
         """ Put code that cleans up any current game progress and starts the game from scratch.
             start_game() method can be called here to avoid code duplication.
             This method can be used after game over or as a handler of "Restart" button, for example.
         """
-        pass
+        self.stack.move_all_cards(self.deck)
+        self.start_game()
 
     def execute_game(self):
         """ This method is called in an endless loop started by GameApp.execute().
@@ -67,7 +87,8 @@ class MyGameController(controller.Controller):
         """ Called when user closes the app.
             Add destruction of all objects, storing of game progress to a file etc. to this method.
         """
-        pass
+        del self.deck
+        del self.stack
 
 
 def main():

@@ -42,7 +42,7 @@ class SolitaireController(controller.Controller):
 
         self.game_start_time = pygame.time.get_ticks()
 
-    def build_custom_objects(self):
+    def build_objects(self):
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
 
         deck_pos = globals.settings_json["deck"]["position"]
