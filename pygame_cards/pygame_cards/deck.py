@@ -6,14 +6,14 @@ try:
     from pygame_cards import globals
     from pygame_cards import enums
     import card
-    import abstract_card_holder
+    import card_holder
 
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
 
 
-class Deck(abstract_card_holder.AbstractCardsHolder):
+class Deck(card_holder.CardsHolder):
     """ Deck of cards. Two types of deck available: short (6..ace) and full (2..ace)"""
 
     def __init__(self, type_, pos, offset, last_card_callback=None):
@@ -22,7 +22,7 @@ class Deck(abstract_card_holder.AbstractCardsHolder):
         :param pos: tuple with coordinates (x, y) for bottom card in the desk
         :param last_card_callback: function that should be called when the last card is removed from the deck
         """
-        abstract_card_holder.AbstractCardsHolder.__init__(self, pos, offset, False, 0, last_card_callback)
+        card_holder.CardsHolder.__init__(self, pos, offset, False, 0, last_card_callback)
         self.type = type_
 
         start = 0

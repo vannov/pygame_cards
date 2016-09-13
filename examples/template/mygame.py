@@ -1,7 +1,7 @@
 import os
 import pygame
 
-from pygame_cards import game_app, controller, enums, globals, deck, abstract_card_holder, card
+from pygame_cards import game_app, controller, enums, globals, deck, card_holder, card
 
 
 class MyGameController(controller.Controller):
@@ -20,7 +20,7 @@ class MyGameController(controller.Controller):
 
         stack_pos = globals.settings_json["stack"]["position"]
         stack_offset = globals.settings_json["stack"]["offset"]
-        self.stack = abstract_card_holder.AbstractCardsHolder(pos=stack_pos, offset=stack_offset)
+        self.stack = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
 
         # All game objects should be added to self objects list with add_object method in order to be rendered.
         self.add_object((self.deck, self.stack))

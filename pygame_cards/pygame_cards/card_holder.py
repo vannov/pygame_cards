@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 try:
     import sys
-    #import abc
     import operator
     from random import shuffle
 
@@ -11,11 +10,10 @@ except ImportError as err:
     sys.exit(2)
 
 
-class AbstractCardsHolder(game_object.GameObject):
-    """ Abstract card holder, from which a card can be grabbed and moved to a different cards holder.
-    Ex.: a player (player's pile of cards), a deck of cards.
+class CardsHolder(game_object.GameObject):
+    """ Card holder, to which cards can be added and from which cards can be grabbed and moved to other cards holders.
+    Ex.: a deck of cards, a player's pile of cards. Can be inherited and modified/extended for specific needs.
     """
-    #__metaclass__ = abc.ABCMeta
 
     def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab, min_cards=0, last_card_callback=None):
         """
@@ -116,6 +114,10 @@ class AbstractCardsHolder(game_object.GameObject):
                 self.update_position(self.offset)
 
     def pop_card(self, top):
+        """ Removes top or bottom cards from the list and returns it.
+        :param top: boolean, if True top card is removed, otherwise bottom card is removed.
+        :return: Card object
+        """
         if len(self.cards) == 0:
             return None
         else:
@@ -129,12 +131,14 @@ class AbstractCardsHolder(game_object.GameObject):
     def pop_top_card(self):
         """ Removes top card from the list and returns it.
         If there are no cards left, returns None.
+        :return: Card object
         """
         return self.pop_card(top=True)
 
     def pop_bottom_card(self):
         """ Removes last card from the list and returns it.
         If there are no cards left, returns None.
+        :return: Card object
         """
         return self.pop_card(top=False)
 
@@ -156,10 +160,10 @@ class AbstractCardsHolder(game_object.GameObject):
 
     def move_all_cards(self, other, back_side_up=True):
         """ Moves all cards to other cards holder.
-        :param other: instance of AbstractCardsHolder where cards will be moved.
+        :param other: instance of CardsHolder where cards will be moved.
         :param back_side_up: boolean, True if cards should be flipped to back side up, False otherwise.
         """
-        if isinstance(other, AbstractCardsHolder):
+        if isinstance(other, CardsHolder):
             while len(self.cards) != 0:
                 card_ = self.pop_top_card()
                 if card_ is not None:
@@ -187,4 +191,9 @@ class AbstractCardsHolder(game_object.GameObject):
             return card_.check_collide(pos=self.pos)
 
     def render(self, screen):
+        """ Does not render anything by default.
+        Should be overridden in derived classes if need to render anything for the holder itself.
+        Cards in the holder are rendered by higher level render_all().
+        :param screen: Screen to render objects on
+        """
         pass

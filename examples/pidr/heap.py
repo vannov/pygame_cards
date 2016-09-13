@@ -2,19 +2,19 @@
 try:
     import sys
 
-    from pygame_cards import abstract_card_holder
+    from pygame_cards import card_holder
     from pygame_cards import card_sprite, globals
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
 
 
-class Heap(abstract_card_holder.AbstractCardsHolder):
+class Heap(card_holder.CardsHolder):
     """ Heap of cards on the table, active cards thrown by players
     """
 
     def __init__(self, pos):
-        abstract_card_holder.AbstractCardsHolder.__init__(self)
+        card_holder.CardsHolder.__init__(self)
         self.pos = pos
 
     def add_card(self, card_, player_name, move=True):

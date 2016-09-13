@@ -4,7 +4,7 @@ try:
     import os
     import pygame
 
-    from pygame_cards import game_app, controller, deck, abstract_card_holder, enums, globals, card
+    from pygame_cards import game_app, controller, deck, card_holder, enums, globals, card
     import holders
 except ImportError as err:
     print "Fail loading a module: %s", err
@@ -57,7 +57,7 @@ class SolitaireController(controller.Controller):
         y_offset = globals.settings_json["stack"]["deck_offset"][1]
         stack_pos = deck_pos[0] + x_offset, deck_pos[1] + y_offset
         stack_offset = globals.settings_json["stack"]["inner_offset"]
-        self.stack = abstract_card_holder.AbstractCardsHolder(stack_pos, stack_offset, enums.GrabPolicy.can_single_grab)
+        self.stack = card_holder.CardsHolder(stack_pos, stack_offset, enums.GrabPolicy.can_single_grab)
 
         foundation_pos = globals.settings_json["foundation"]["position"]
         foundation_offset = globals.settings_json["foundation"]["offset"]

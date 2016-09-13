@@ -1,5 +1,5 @@
 import pygame
-from pygame_cards import abstract_card_holder, enums, globals, card
+from pygame_cards import card_holder, enums, globals, card
 
 
 def draw_empty_card_pocket(self, screen):
@@ -8,7 +8,7 @@ def draw_empty_card_pocket(self, screen):
         pygame.draw.rect(screen, (77, 77, 77), rect, 2)
 
 
-class Foundation(abstract_card_holder.AbstractCardsHolder):
+class Foundation(card_holder.CardsHolder):
     def can_drop_card(self, card_):
         """ Check if a card can be dropped into a foundation. Conditions:
             - If a pocket is empty, only an ace can be dropped
@@ -27,7 +27,7 @@ class Foundation(abstract_card_holder.AbstractCardsHolder):
         draw_empty_card_pocket(self, screen)
 
 
-class Pile(abstract_card_holder.AbstractCardsHolder):
+class Pile(card_holder.CardsHolder):
     def can_drop_card(self, card_):
         """ Check if a card can be dropped into a foundation. Conditions:
             - If a pile is empty, only a King ca be dropped
@@ -54,7 +54,7 @@ class Pile(abstract_card_holder.AbstractCardsHolder):
         draw_empty_card_pocket(self, screen)
 
 
-class GrabbedCardsHolder(abstract_card_holder.AbstractCardsHolder):
+class GrabbedCardsHolder(card_holder.CardsHolder):
     def add_card(self, card_, on_top=False):
         if isinstance(card_, card.Card):
             if on_top:
@@ -69,7 +69,7 @@ class GrabbedCardsHolder(abstract_card_holder.AbstractCardsHolder):
             self.update_position(self.offset)
 
 
-class DeckDiscard(abstract_card_holder.AbstractCardsHolder):
+class DeckDiscard(card_holder.CardsHolder):
     """ Container for temporary discarded cards from Decks. Invisible object, nothing renders.
         When Deck scrolling cycle is over, cards from this holder will move back to Deck.
     """

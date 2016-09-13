@@ -5,16 +5,16 @@ try:
     import pidr_enums
     import logic
     from pygame_cards import globals, enums, card_sprite
-    from pygame_cards import abstract_card_holder
+    from pygame_cards import card_holder
 
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
 
 
-class Player(abstract_card_holder.AbstractCardsHolder):
+class Player(card_holder.CardsHolder):
     def __init__(self, name, pos, bot = True):
-        abstract_card_holder.AbstractCardsHolder.__init__(self, 1)
+        card_holder.CardsHolder.__init__(self, 1)
         self.name = name
         self.pos = pos
         self.bot = bot
