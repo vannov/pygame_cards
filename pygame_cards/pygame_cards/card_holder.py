@@ -15,14 +15,15 @@ class CardsHolder(game_object.GameObject):
     Ex.: a deck of cards, a player's pile of cards. Can be inherited and modified/extended for specific needs.
     """
 
-    def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab, min_cards=0, last_card_callback=None):
+    def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab, last_card_callback=None):
         """
-        :param min_cards: minimum number of cards required for cards holder to exist (default 0)
-        :param last_card_callback: function to be called once the last card is removed (default None)
+        :param pos: tuple with coordinates (x, y) - position of top left corner of cards holder
+        :param offset: tuple (x, y) with values of offset between cards in the holder
+        :param grab_policy: value from enums.GrabPolicy (by default enums.GrabPolicy.no_grab)
+        :param last_card_callback: function to be called once the last card is removed (by default None)
         """
         self.cards = []
         game_object.GameObject.__init__(self, self.cards, grab_policy)
-        self.min_cards = min_cards
         self.last_card_callback = last_card_callback
         self.pos = pos
         self.offset = offset
@@ -54,20 +55,20 @@ class CardsHolder(game_object.GameObject):
     def try_grab_card(self, pos):
         """ Tries to grab a card (or multiple cards) with a mouse click.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
-        :return: List with Card object if grabbed or None if card cannot be grabbed or mouse click is out of the holder.
+        :return: List with Card object if grabbed or None if card can't be grabbed or mouse click is not on the holder.
         """
         grabbed_cards = None
-        if len(self.cards) > self.min_cards:
+        if len(self.cards) > 0:
             if self.grab_policy == enums.GrabPolicy.can_single_grab:
                 if self.check_click(pos):
                     grabbed_cards = [self.pop_top_card()]
             elif self.grab_policy == enums.GrabPolicy.can_multi_grab:
                 index = -1
-                for c in reversed(self.cards):
-                    if c.back_up:
+                for card_ in reversed(self.cards):
+                    if card_.back_up:
                         break
-                    if c.check_mouse(pos, True):
-                        index = self.cards.index(c)
+                    if card_.check_mouse(pos, True):
+                        index = self.cards.index(card_)
                         break
 
                 if index != -1:
@@ -84,7 +85,7 @@ class CardsHolder(game_object.GameObject):
         :param bot: if current player is a 'bot', i.e. virtual adversary (default False)
         :return: True if there is a card grabbed, False otherwise
         """
-        if not self.grabbed_card and len(self.cards) > self.min_cards:
+        if not self.grabbed_card and len(self.cards) > 0:
             if bot or self.cards[-1].check_mouse(pos, True):
                 if self.cards[-1].back_up:
                     self.cards[-1].flip()
@@ -105,8 +106,8 @@ class CardsHolder(game_object.GameObject):
             if on_top:
                 pos_ = self.pos
                 if len(self.cards) is not 0:
-                    l = len(self.cards)
-                    pos_ = self.pos[0] + l * self.offset[0], self.pos[1] + l * self.offset[1]
+                    length = len(self.cards)
+                    pos_ = self.pos[0] + length * self.offset[0], self.pos[1] + length * self.offset[1]
                 card_.set_pos(pos_)
                 self.cards.append(card_)
             else:
@@ -149,8 +150,8 @@ class CardsHolder(game_object.GameObject):
 
     def flip_cards(self):
         """ Flip cards from face-up to face-down and vice versa """
-        for card in self.cards:
-            card.flip()
+        for card_ in self.cards:
+            card_.flip()
 
     def sort_cards(self):
         """ Sort cards by suits and ranks from lower to higher.

@@ -79,8 +79,8 @@ class Title(AbstractGUI):
             text_surface = self.font.render(self.text, True, Button.text_color)
             self.screen.blit(text_surface, self.pos)
 
-    """ No action on click for text label """
     def check_mouse(self, p, down):
+        """ No action on click for text label """
         pass
 
 

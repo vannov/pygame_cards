@@ -22,7 +22,7 @@ class Deck(card_holder.CardsHolder):
         :param pos: tuple with coordinates (x, y) for bottom card in the desk
         :param last_card_callback: function that should be called when the last card is removed from the deck
         """
-        card_holder.CardsHolder.__init__(self, pos, offset, False, 0, last_card_callback)
+        card_holder.CardsHolder.__init__(self, pos, offset, False, last_card_callback)
         self.type = type_
 
         start = 0

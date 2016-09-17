@@ -47,6 +47,7 @@ class Card(game_object.GameObject):
         return self.sprite.is_clicked(pos)
 
     def unclick(self):
+        """ Marks card as unclicked, i.e. it won't stick to the mouse cursor """
         self.sprite.clicked = False
 
     def check_mouse(self, pos, down):

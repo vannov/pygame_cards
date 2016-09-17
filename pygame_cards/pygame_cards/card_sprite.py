@@ -3,13 +3,10 @@ from __future__ import division
 try:
     import sys
     import os
-    import logging
     import math
-    import abc
     import pygame
 
-    import enums
-    from pygame_cards import globals
+    from pygame_cards import globals, enums
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
@@ -24,34 +21,11 @@ def load_img(path):
     # In production environment use relative path from json
         return path
 
-class AbstractCardSprite(pygame.sprite.Sprite):
-    """ Abstract base class for Card sprite classes.
-    Declares interface of methods that should be defined in derived classes.
-    """
-    __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
-    def update(self):
-        pass
-
-    @abc.abstractmethod
-    def render(self, screen):
-        pass
-
-    @abc.abstractmethod
-    def check_mouse(self, position, down):
-        pass
-
-    @abc.abstractmethod
-    def check_card_collide(self, sprite):
-        pass
-
-
-class AbstractPygameCardSprite(AbstractCardSprite, object):
+class AbstractPygameCardSprite(pygame.sprite.Sprite):
     """ Abstract base class for Card sprite with pygame routines implemented in default methods. """
 
     def __init__(self, pos):
-        AbstractCardSprite.__init__(self)
         self.rect = [pos[0], pos[1], 0, 0]
         self.mouse_offset = [0, 0]
         self.clicked = False
@@ -83,10 +57,7 @@ class AbstractPygameCardSprite(AbstractCardSprite, object):
         screen.blit(*self.get_render_tuple())
 
     def get_render_tuple(self):
-        if self.back_up:
-            return self.back_image, (self.rect[0], self.rect[1])
-        else:
-            return self.image, (self.rect[0], self.rect[1])
+        return self.image, (self.rect[0], self.rect[1])
 
     def is_clicked(self, p):
         return p[0] > self.rect[0] and p[0] < (self.rect[0] + self.get_rect()[2]) and\
@@ -103,17 +74,19 @@ class AbstractPygameCardSprite(AbstractCardSprite, object):
             return False
 
     def check_card_collide(self, sprite):
-        return self.rect.colliderect(sprite.rect)
+        rect = pygame.Rect(self.rect)
+        return rect.colliderect(sprite.rect)
 
     def check_area_collide(self, pos):
-        rect = pygame.Rect((pos[0], pos[1], self.rect[2], self.rect[3]))
-        return self.rect.colliderect(rect)
+        rect1 = pygame.Rect(self.rect)
+        rect2 = pygame.Rect((pos[0], pos[1], self.rect[2], self.rect[3]))
+        return rect1.colliderect(rect2)
 
 
 class CardSprite(AbstractPygameCardSprite):
     """ Concrete pygame Card sprite class. Represents both front and back card's sprites. """
 
-    def __init__(self, suit, rank, pos, back_up = False):
+    def __init__(self, suit, rank, pos, back_up=False):
         AbstractPygameCardSprite.__init__(self, pos)
         self.suit = suit
         self.rank = rank
@@ -127,9 +100,12 @@ class CardSprite(AbstractPygameCardSprite):
         temp_image = pygame.image.load(load_img(back_img_path)).convert_alpha()
         self.back_image = pygame.transform.scale(temp_image, globals.settings_json["card"]["size"])
         self.back_up = back_up
-        # self.pos = pos  # (x, y)
-        # self.mouse_offset = [0, 0]
-        # self.clicked = False
+
+    def get_render_tuple(self):
+        if self.back_up:
+            return self.back_image, (self.rect[0], self.rect[1])
+        else:
+            return self.image, (self.rect[0], self.rect[1])
 
     def flip(self):
         self.back_up = not self.back_up
