@@ -1,7 +1,7 @@
 import os
 
 # Import other modules from pygame_cards if needed.
-from pygame_cards import game_app, controller, enums, globals, card_holder, deck, card
+from pygame_cards import game_app, controller, enums, card_holder, deck, card
 
 
 class MyGameController(controller.Controller):

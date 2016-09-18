@@ -3,10 +3,7 @@ try:
     import sys
     from random import shuffle
 
-    from pygame_cards import globals
-    from pygame_cards import enums
-    import card
-    import card_holder
+    from pygame_cards import enums, card, card_holder
 
 except ImportError as err:
     print "Fail loading a module: %s", err
@@ -42,4 +39,4 @@ class Deck(card_holder.CardsHolder):
     def shuffle(self):
         """ Shuffles cards in the deck randomly """
         shuffle(self.cards)
-        self.update_position(globals.settings_json["deck"]["offset"])
+        self.update_position(self.offset)

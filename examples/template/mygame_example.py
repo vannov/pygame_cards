@@ -1,7 +1,7 @@
 import os
 
 # Import other modules from pygame_cards if needed.
-from pygame_cards import game_app, controller, enums, globals, card_holder, deck, card
+from pygame_cards import game_app, controller, enums, card_holder, deck, card
 
 
 class MyGameController(controller.Controller):
@@ -26,19 +26,19 @@ class MyGameController(controller.Controller):
             This method is executed during creation of GameApp object.
         """
 
-        deck_pos = globals.settings_json["deck"]["position"]
-        deck_offset = globals.settings_json["deck"]["offset"]
+        deck_pos = self.settings_json["deck"]["position"]
+        deck_offset = self.settings_json["deck"]["offset"]
         self.deck = deck.Deck(type_=enums.DeckType.short, pos=deck_pos, offset=deck_offset)
 
-        stack_pos = globals.settings_json["stack"]["position"]
-        stack_offset = globals.settings_json["stack"]["offset"]
+        stack_pos = self.settings_json["stack"]["position"]
+        stack_offset = self.settings_json["stack"]["offset"]
         self.stack = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
 
         # All game objects should be added to self objects list with add_object method in order to be rendered.
         self.add_object((self.deck, self.stack))
 
         # Create Restart button
-        self.gui_interface.show_button(globals.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
+        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
 
     def start_game(self):
         """ Put game initialization code here. For example: dealing of cards, initialization of game timer etc.

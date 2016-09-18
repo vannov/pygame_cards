@@ -1,10 +1,11 @@
 import pygame
-from pygame_cards import card_holder, enums, globals, card
+from pygame_cards import card_holder, enums, card
 
 
 def draw_empty_card_pocket(self, screen):
     if len(self.cards) == 0:
-        rect = (self.pos[0], self.pos[1], globals.settings_json["card"]["size"][0], globals.settings_json["card"]["size"][1])
+        rect = (self.pos[0], self.pos[1],
+                card_holder.CardsHolder.card_json["size"][0], card_holder.CardsHolder.card_json["size"][1])
         pygame.draw.rect(screen, (77, 77, 77), rect, 2)
 
 

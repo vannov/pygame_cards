@@ -6,7 +6,7 @@ try:
     import math
     import pygame
 
-    from pygame_cards import globals, enums
+    from pygame_cards import enums
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
@@ -84,21 +84,30 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
 
 
 class CardSprite(AbstractPygameCardSprite):
-    """ Concrete pygame Card sprite class. Represents both front and back card's sprites. """
+    """ Concrete pygame Card sprite class. Represents both front and back card's sprites.
+
+    Attributes:
+        card_json - The 'card' node of the settings.json. Data can be accessed via [] operator,
+                    for example: CardsHolder.card_json["size"][0]
+    """
+
+    card_json = None
 
     def __init__(self, suit, rank, pos, back_up=False):
+        if CardSprite.card_json is None:
+            raise ValueError('CardSprite.card_json is not initialized')
         AbstractPygameCardSprite.__init__(self, pos)
         self.suit = suit
         self.rank = rank
         temp_image = pygame.image.load(load_img(self.get_image_path(self.suit, self.rank))).convert_alpha()
-        self.image = pygame.transform.scale(temp_image, globals.settings_json["card"]["size"])
+        self.image = pygame.transform.scale(temp_image, CardSprite.card_json["size"])
         self.rect = self.image.get_rect()
         self.rect[0] = pos[0]
         self.rect[1] = pos[1]
 
-        back_img_path = globals.settings_json["card"]["back_sprite_file"]
+        back_img_path = CardSprite.card_json["back_sprite_file"]
         temp_image = pygame.image.load(load_img(back_img_path)).convert_alpha()
-        self.back_image = pygame.transform.scale(temp_image, globals.settings_json["card"]["size"])
+        self.back_image = pygame.transform.scale(temp_image, CardSprite.card_json["size"])
         self.back_up = back_up
 
     def get_render_tuple(self):
@@ -112,7 +121,7 @@ class CardSprite(AbstractPygameCardSprite):
 
     @staticmethod
     def get_image_path(s, r):
-        path = globals.settings_json["card"]["front_sprite_path"]
+        path = CardSprite.card_json["front_sprite_path"]
 
         if r == enums.Rank.two:
             path += "2_of_"
@@ -177,7 +186,7 @@ class SpriteMove:
             sprite.angle = math.atan2(dest_pos[1] - sprite.start_pos[1], dest_pos[0] - sprite.start_pos[0])
             sprite.distance = SpriteMove.calc_distance(dest_pos, sprite.start_pos)
             if speed is None:
-                sprite.speed = globals.settings_json["card"]["move_speed"]
+                sprite.speed = CardSprite.card_json["move_speed"]
             else:
                 sprite.speed = speed
             sprite.completed = False

@@ -9,7 +9,7 @@ try:
 
     import gui
 
-    from pygame_cards import globals, controller
+    from pygame_cards import controller, card_holder, card_sprite
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
@@ -82,9 +82,9 @@ class GameApp:
         self.background_color = None
         self.size = None
 
-        globals.settings_json = self.load_json(json_path)
-        if globals.settings_json is None:
-            raise ValueError('settings json file is not loaded', 'GameApp.__init__')
+        self.settings_json = self.load_json(json_path)
+        if self.settings_json is None:
+            raise ValueError('settings.json file is not loaded', 'GameApp.__init__')
         self.load_settings_from_json()
         pygame.init()
         pygame.font.init()
@@ -99,6 +99,7 @@ class GameApp:
         if isinstance(game_controller, controller.Controller):
             self.game_controller = game_controller
             self.game_controller.gui_interface = self.gui_interface
+            self.game_controller.settings_json = self.settings_json
             self.game_controller.build_objects()
 
     def is_double_click(self):
@@ -143,9 +144,13 @@ class GameApp:
             - Window size
             Other custom game-specific settings should be set by derived classes in load_game_settings_from_json().
         """
-        self.title = globals.settings_json["window"]["title"]
-        self.background_color = globals.settings_json["window"]['background_color']
-        self.size = globals.settings_json["window"]["size"]
+        self.title = self.settings_json["window"]["title"]
+        self.background_color = self.settings_json["window"]['background_color']
+        self.size = self.settings_json["window"]["size"]
+
+        # Init class members from other modules to avoid having a global varialbe for settings_json
+        card_holder.CardsHolder.card_json = self.settings_json["card"]
+        card_sprite.CardSprite.card_json = self.settings_json["card"]
 
     # @abc.abstractmethod
     # def init_gui(self):

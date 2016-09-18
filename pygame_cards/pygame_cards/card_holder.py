@@ -4,7 +4,7 @@ try:
     import operator
     from random import shuffle
 
-    from pygame_cards import game_object, card, globals, enums
+    from pygame_cards import game_object, card, enums
 except ImportError as err:
     print "Fail loading a module: %s", err
     sys.exit(2)
@@ -13,7 +13,13 @@ except ImportError as err:
 class CardsHolder(game_object.GameObject):
     """ Card holder, to which cards can be added and from which cards can be grabbed and moved to other cards holders.
     Ex.: a deck of cards, a player's pile of cards. Can be inherited and modified/extended for specific needs.
+
+    Attributes:
+        card_json - The 'card' node of the settings.json. Data can be accessed via [] operator,
+                    for example: CardsHolder.card_json["size"][0]
     """
+
+    card_json = None
 
     def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab, last_card_callback=None):
         """
@@ -36,8 +42,8 @@ class CardsHolder(game_object.GameObject):
         if len(self.cards) is not 0:
             if self.cards[-1].is_clicked(pos):
                 return True
-        elif pos[0] > self.pos[0] and pos[0] < (self.pos[0] + globals.settings_json["card"]["size"][0]) and\
-            pos[1] > self.pos[1] and pos[1] < (self.pos[1] + globals.settings_json["card"]["size"][1]):
+        elif pos[0] > self.pos[0] and pos[0] < (self.pos[0] + CardsHolder.card_json["size"][0]) and\
+            pos[1] > self.pos[1] and pos[1] < (self.pos[1] + CardsHolder.card_json["size"][1]):
             return True
         else:
             return False

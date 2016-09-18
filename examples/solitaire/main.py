@@ -4,7 +4,7 @@ try:
     import os
     import pygame
 
-    from pygame_cards import game_app, controller, deck, card_holder, enums, globals, card
+    from pygame_cards import game_app, controller, deck, card_holder, enums, card
     import holders
 except ImportError as err:
     print "Fail loading a module: %s", err
@@ -45,23 +45,23 @@ class SolitaireController(controller.Controller):
     def build_objects(self):
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
 
-        deck_pos = globals.settings_json["deck"]["position"]
-        deck_offset = globals.settings_json["deck"]["offset"]
+        deck_pos = self.settings_json["deck"]["position"]
+        deck_offset = self.settings_json["deck"]["offset"]
         # TODO create callback
         self.deck = deck.Deck(enums.DeckType.full, deck_pos, deck_offset, None)
 
         self.deck_discard = holders.DeckDiscard()
 
         deck_pos = self.deck.pos
-        x_offset = globals.settings_json["stack"]["deck_offset"][0] + globals.settings_json["card"]["size"][0]
-        y_offset = globals.settings_json["stack"]["deck_offset"][1]
+        x_offset = self.settings_json["stack"]["deck_offset"][0] + self.settings_json["card"]["size"][0]
+        y_offset = self.settings_json["stack"]["deck_offset"][1]
         stack_pos = deck_pos[0] + x_offset, deck_pos[1] + y_offset
-        stack_offset = globals.settings_json["stack"]["inner_offset"]
+        stack_offset = self.settings_json["stack"]["inner_offset"]
         self.stack = card_holder.CardsHolder(stack_pos, stack_offset, enums.GrabPolicy.can_single_grab)
 
-        foundation_pos = globals.settings_json["foundation"]["position"]
-        foundation_offset = globals.settings_json["foundation"]["offset"]
-        foundation_inner_offset = globals.settings_json["foundation"]["inner_offset"]
+        foundation_pos = self.settings_json["foundation"]["position"]
+        foundation_offset = self.settings_json["foundation"]["offset"]
+        foundation_inner_offset = self.settings_json["foundation"]["inner_offset"]
         self.foundations = []
         for i in range(0, 4):
             self.foundations.append(holders.Foundation(foundation_pos, foundation_inner_offset))
@@ -71,9 +71,9 @@ class SolitaireController(controller.Controller):
         self.add_object((self.deck, self.stack))
 
         self.piles = []
-        pile_pos = globals.settings_json["pile"]["position"]
-        pile_offset = globals.settings_json["pile"]["offset"]
-        pile_inner_offset = globals.settings_json["pile"]["inner_offset"]
+        pile_pos = self.settings_json["pile"]["position"]
+        pile_offset = self.settings_json["pile"]["offset"]
+        pile_inner_offset = self.settings_json["pile"]["inner_offset"]
         for i in range(1, 8):
             pile = holders.Pile(pile_pos, pile_inner_offset, enums.GrabPolicy.can_multi_grab)
             pile_pos = pile_pos[0] + pile_offset[0], pile_pos[1] + pile_offset[1]
@@ -84,7 +84,7 @@ class SolitaireController(controller.Controller):
         self.add_object(self.grabbed_cards_holder)
         self.owner_of_grabbed_card = None
 
-        self.gui_interface.show_button(globals.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
+        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
 
     def check_win(self):
         win = True
@@ -99,8 +99,8 @@ class SolitaireController(controller.Controller):
 
     def show_win_ui(self):
         text = "You won, congrats!"
-        pos = globals.settings_json["gui"]["win_label"]
-        size = globals.settings_json["gui"]["win_text_size"]
+        pos = self.settings_json["gui"]["win_label"]
+        size = self.settings_json["gui"]["win_text_size"]
         self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0, id_="win_label1")
         if hasattr(self, "game_start_time") and self.game_start_time is not None:
             total_seconds = (pygame.time.get_ticks() - self.game_start_time)/1000

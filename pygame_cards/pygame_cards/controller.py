@@ -21,7 +21,7 @@ class Controller:
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, objects_list=None, gui_interface=None):
+    def __init__(self, objects_list=None, gui_interface=None, settings_json=None):
         """
         Initializes Controller object.
         :param objects_list: list of game objects
@@ -31,6 +31,7 @@ class Controller:
         if objects_list is not None and isinstance(objects_list, list):
             self.objects = objects_list
         self.gui_interface = gui_interface
+        self.settings_json = settings_json
         self.started = False
 
     @abc.abstractmethod
