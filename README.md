@@ -10,24 +10,20 @@ Check out the "examples" folder - it contains implementation of classic "Klondik
 
 ## Getting Started
 
-There is a template project under "examples" folder that contains a sceleton required to use the framework. The easiest way to get started - copy content of "templates" folder and start adding your code into mygame.py. 
+There is a template project under "examples" folder that contains a sceleton required to use the framework. The easiest way to get started - copy content of examples/template folder and start adding your code into mygame.py. 
 
-mygame.py script contains comments with description of methods that have to be implemented in order to use the framework.
-Template project contains settings.json – another necessary element of a game powered by pygame_cards. Path to this JSON file should be specified when initializing a game with an object of GameApp class from game_app module. Required fields for the JSON file are "window", "card" and "gui". You can also add any amount of custom fields in that file and use them in your code.
+*mygame.py* script contains comments with description of methods that have to be implemented in order to use the framework.
+Template project contains *settings.json* – another necessary element of a game powered by pygame_cards. Path to this JSON file should be specified when initializing a game with an object of GameApp class from game_app module. Required fields for the JSON file are "window", "card" and "gui". You can also add any amount of custom fields in that file and use them in your code.
 
-There are also mygame_example.py and settings_example.json files in the "templates" folder with some custom code that create very simple game. For more complex example refer to Klondike project under examples/klondike.
+There are also mygame_example.py and settings_example.json files in the examples/template folder with some custom code that create very simple game. For more complex example refer to Klondike project under examples/klondike.
 
-### Installing
+## Installing
 
 placeholder...
 
 ## Deployment
 
 placeholder...
-
-## Authors
-
-* **Ivan Novosad* - *Initial work* - [vannov](https://github.com/vannov)
 
 ## License
 
