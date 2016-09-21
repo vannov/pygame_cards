@@ -93,7 +93,7 @@ class MyGameController(controller.Controller):
 
 def main():
     # JSON files contains game settings like window size, position of game and gui elements etc.
-    json_path = os.path.join(os.getcwd(), 'settings.json')
+    json_path = os.path.join(os.getcwd(), 'settings_example.json')
 
     # Create an instance of GameApp and pass a path to setting json file and an instance of custom Controller object.
     # This will initialize the game, build_objects() from Controller will be called at this step.

@@ -72,6 +72,9 @@ class MyGameController(controller.Controller):
 
 def main():
     # JSON files contains game settings like window size, position of game and gui elements etc.
+    # Necessary fields are "window", "card" and "gui" - they are added to settings.json in this example.
+    # Feel free to add any custom fields to that file, they will be accessible via "self.settings_json" attribute of
+    # your class derived from controller.Controller. See how custom fields from JSON are used in mygame_examples.py
     json_path = os.path.join(os.getcwd(), 'settings.json')
 
     # Create an instance of GameApp and pass a path to setting json file and an instance of custom Controller object.
