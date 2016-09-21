@@ -1,7 +1,7 @@
 {
 	"window": {
 		"size": [570, 460],
-		"title": "Solitaire",
+		"title": "Klondike",
 		"background_color": [0, 153, 0]
 	},
 	"card": {

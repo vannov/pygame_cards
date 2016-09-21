@@ -11,7 +11,7 @@ except ImportError as err:
     sys.exit(2)
 
 
-class SolitaireController(controller.Controller):
+class KlondikeController(controller.Controller):
 
     def restart_game(self):
         self.deck_discard.move_all_cards(self.deck)
@@ -197,8 +197,8 @@ class SolitaireController(controller.Controller):
 
 def main():
     json_path = os.path.join(os.getcwd(), 'settings.json')
-    solitaire_app = game_app.GameApp(json_path=json_path, game_controller=SolitaireController())
-    solitaire_app.execute()
+    klondike_app = game_app.GameApp(json_path=json_path, game_controller=KlondikeController())
+    klondike_app.execute()
 
 if __name__ == '__main__':
     main()
