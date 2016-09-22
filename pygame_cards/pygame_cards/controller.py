@@ -1,5 +1,6 @@
 import abc
 
+from pygame_cards import game_object
 
 class Controller:
     """ Abstract interface class that controls game logic and handles user events,
@@ -24,15 +25,18 @@ class Controller:
     def __init__(self, objects_list=None, gui_interface=None, settings_json=None):
         """
         Initializes Controller object.
-        :param objects_list: list of game objects
+        :param objects_list: list of game objects that should be rendered
         :param gui_interface: gui interface object
         """
-        self.objects = []
+        self.rendered_objects = []
         if objects_list is not None and isinstance(objects_list, list):
-            self.objects = objects_list
+            self.rendered_objects = objects_list
         self.gui_interface = gui_interface
         self.settings_json = settings_json
         self.started = False
+
+        # Dictionary where any custom objects needed can be stored
+        self.custom_dict = dict()
 
     @abc.abstractmethod
     def build_objects(self):
@@ -89,17 +93,15 @@ class Controller:
         """ Renders game objects.
         :param screen: Screen to render objects on.
         """
-        if self.objects is not None:
-            for obj in self.objects:
-                # TODO: add check is instance of GameObject class
-                obj.render_all(screen)
+        if self.rendered_objects is not None:
+            for obj in self.rendered_objects:
+                if isinstance(obj, game_object.GameObject):
+                    obj.render_all(screen)
 
     def add_object(self, obj):
-        # TODO: uncomment isinstance check
-        #if isinstance(obj, GameObject):
-        if self.objects is None:
-            self.objects = []
+        if self.rendered_objects is None:
+            self.rendered_objects = []
         if isinstance(obj, tuple):
-            self.objects.extend(obj)
-        else:
-            self.objects.append(obj)
+            self.rendered_objects.extend(obj)
+        elif isinstance(obj, game_object.GameObject):
+            self.rendered_objects.append(obj)

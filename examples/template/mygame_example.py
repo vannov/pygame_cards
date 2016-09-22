@@ -17,63 +17,70 @@ class MyGameController(controller.Controller):
             - restart_game()
             - cleanup()
 
-        These methods are called from higher level GameApp class. See details about each method below.
+        These methods are called from higher level GameApp class.
+        See details about each method below.
         Other auxiliary methods can be added if needed and called from the mandatory methods.
     """
 
     def build_objects(self):
-        """ Create permanent game objects (deck of cards, players etc.) and GUI elements in this method.
-            This method is executed during creation of GameApp object.
+        """ Create permanent game objects (deck of cards, players etc.) and
+        GUI elements in this method. This method is executed during creation of GameApp object.
         """
 
         deck_pos = self.settings_json["deck"]["position"]
         deck_offset = self.settings_json["deck"]["offset"]
-        self.deck = deck.Deck(type_=enums.DeckType.short, pos=deck_pos, offset=deck_offset)
+        self.custom_dict["deck"] = deck.Deck(type_=enums.DeckType.short,
+                                             pos=deck_pos, offset=deck_offset)
 
         stack_pos = self.settings_json["stack"]["position"]
         stack_offset = self.settings_json["stack"]["offset"]
-        self.stack = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
+        self.custom_dict["stack"] = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
 
-        # All game objects should be added to self objects list with add_object method in order to be rendered.
-        self.add_object((self.deck, self.stack))
+        # All game objects should be added to self objects list
+        #  with add_object method in order to be rendered.
+        self.add_object((self.custom_dict["deck"], self.custom_dict["stack"]))
 
         # Create Restart button
-        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
+        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
+                                       "Restart", self.restart_game)
 
     def start_game(self):
-        """ Put game initialization code here. For example: dealing of cards, initialization of game timer etc.
+        """ Put game initialization code here.
+            For example: dealing of cards, initialization of game timer etc.
             This method is triggered by GameApp.execute().
         """
 
         # Shuffle cards in the deck
-        self.deck.shuffle()
+        self.custom_dict["deck"].shuffle()
 
     def process_mouse_event(self, pos, down, double_click):
-        """ Put code that handles mouse events here. For example: grab card from a deck on mouse down event,
+        """ Put code that handles mouse events here.
+            For example: grab card from a deck on mouse down event,
             drop card to a pile on mouse up event etc.
             This method is called every time mouse event is detected.
             :param pos: tuple with mouse coordinates (x, y)
             :param down: boolean, True for mouse down event, False for mouse up event
             :param double_click: boolean, True if it's a double click event
         """
-        if down and self.deck.is_clicked(pos):
-            card_ = self.deck.pop_top_card()
+        if down and self.custom_dict["deck"].is_clicked(pos):
+            card_ = self.custom_dict["deck"].pop_top_card()
             if isinstance(card_, card.Card):
                 card_.flip()
-                self.stack.add_card(card_)
+                self.custom_dict["stack"].add_card(card_)
 
     def restart_game(self):
         """ Put code that cleans up any current game progress and starts the game from scratch.
-            start_game() method can be called here to avoid code duplication.
-            This method can be used after game over or as a handler of "Restart" button, for example.
+            start_game() method can be called here to avoid code duplication. For example,
+            This method can be used after game over or as a handler of "Restart" button.
         """
-        self.stack.move_all_cards(self.deck)
+        self.custom_dict["stack"].move_all_cards(self.custom_dict["deck"])
         self.start_game()
 
     def execute_game(self):
         """ This method is called in an endless loop started by GameApp.execute().
-        IMPORTANT: do not put any "heavy" computations in this method! It is executed frequently in an endless loop
-        during the app runtime, so any "heavy" code will slow down the performance.
+        IMPORTANT: do not put any "heavy" computations in this method!
+        It is executed frequently in an endless loop during the app runtime,
+        so any "heavy" code will slow down the performance.
         If you don't need to check something at every moment of the game, do not define this method.
 
         Possible things to do in this method:
@@ -87,16 +94,19 @@ class MyGameController(controller.Controller):
         """ Called when user closes the app.
             Add destruction of all objects, storing of game progress to a file etc. to this method.
         """
-        del self.deck
-        del self.stack
+        del self.custom_dict["deck"]
+        del self.custom_dict["stack"]
 
 
 def main():
+    """ Entry point of the application. """
+
     # JSON files contains game settings like window size, position of game and gui elements etc.
     json_path = os.path.join(os.getcwd(), 'settings_example.json')
 
-    # Create an instance of GameApp and pass a path to setting json file and an instance of custom Controller object.
-    # This will initialize the game, build_objects() from Controller will be called at this step.
+    # Create an instance of GameApp and pass a path to setting json file
+    # and an instance of custom Controller object. This will initialize the game,
+    # build_objects() from Controller will be called at this step.
     solitaire_app = game_app.GameApp(json_path=json_path, game_controller=MyGameController())
 
     # Start executing the game. This will call start_game() from Controller,

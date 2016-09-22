@@ -8,7 +8,13 @@ Check out the "examples" folder - it contains implementation of classic "Klondik
 
 <img src="https://github.com/vannov/pygame_cards/blob/int/examples/klondike/klondike.png" width="570" height="470"/>
 
-## Getting Started
+## Installation 
+
+placeholder...
+
+## Usage
+
+#Getting Started
 
 There is a template project under "examples" folder that contains a sceleton required to use the framework. The easiest way to get started - copy content of examples/template folder and start adding your code into mygame.py. 
 
@@ -17,11 +23,15 @@ Template project contains *settings.json* – another necessary element of a gam
 
 There are also mygame_example.py and settings_example.json files in the examples/template folder with some custom code that create very simple game. For more complex example refer to Klondike project under examples/klondike.
 
-## Installing
+# JSON file
 
 placeholder...
 
-## Deployment
+# Controller class
+
+placeholder...
+
+# Deployment
 
 placeholder...
 
