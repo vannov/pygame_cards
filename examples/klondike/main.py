@@ -38,6 +38,7 @@ class KlondikeController(controller.Controller):
                 card_ = self.custom_dict["deck"].pop_top_card()
                 if j == i - 1:
                     card_.flip()
+
                 self.custom_dict["piles"][i-1].add_card(card_)
 
         self.game_start_time = pygame.time.get_ticks()
@@ -61,16 +62,7 @@ class KlondikeController(controller.Controller):
         self.custom_dict["stack"] = card_holder.CardsHolder(stack_pos, stack_offset,
                                                             enums.GrabPolicy.can_single_grab)
 
-        foundation_pos = self.settings_json["foundation"]["position"]
-        foundation_offset = self.settings_json["foundation"]["offset"]
-        foundation_inner_offset = self.settings_json["foundation"]["inner_offset"]
-        self.custom_dict["foundations"] = []
-        for i in range(0, 4):
-            self.custom_dict["foundations"].append(holders.Foundation(foundation_pos, foundation_inner_offset))
-            foundation_pos = foundation_pos[0] + foundation_offset[0], foundation_pos[1] + foundation_offset[1]
-            self.add_object(self.custom_dict["foundations"][i])
-
-        self.add_object((self.custom_dict["deck"], self.custom_dict["stack"]))
+        self.add_rendered_object((self.custom_dict["deck"], self.custom_dict["stack"]))
 
         self.custom_dict["piles"] = []
         pile_pos = self.settings_json["pile"]["position"]
@@ -79,11 +71,20 @@ class KlondikeController(controller.Controller):
         for i in range(1, 8):
             pile = holders.Pile(pile_pos, pile_inner_offset, enums.GrabPolicy.can_multi_grab)
             pile_pos = pile_pos[0] + pile_offset[0], pile_pos[1] + pile_offset[1]
-            self.add_object(pile)
+            self.add_rendered_object(pile)
             self.custom_dict["piles"].append(pile)
 
+        foundation_pos = self.settings_json["foundation"]["position"]
+        foundation_offset = self.settings_json["foundation"]["offset"]
+        foundation_inner_offset = self.settings_json["foundation"]["inner_offset"]
+        self.custom_dict["foundations"] = []
+        for i in range(0, 4):
+            self.custom_dict["foundations"].append(holders.Foundation(foundation_pos, foundation_inner_offset))
+            foundation_pos = foundation_pos[0] + foundation_offset[0], foundation_pos[1] + foundation_offset[1]
+            self.add_rendered_object(self.custom_dict["foundations"][i])
+
         self.custom_dict["grabbed_cards_holder"] = holders.GrabbedCardsHolder((0, 0), pile_inner_offset)
-        self.add_object(self.custom_dict["grabbed_cards_holder"])
+        self.add_rendered_object(self.custom_dict["grabbed_cards_holder"])
         self.custom_dict["owner_of_grabbed_card"] = None
 
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
@@ -189,7 +190,9 @@ class KlondikeController(controller.Controller):
                 c = holder.cards[-1]
                 for found in self.custom_dict["foundations"]:
                     if found.can_drop_card(c):
-                        found.add_card(holder.pop_top_card())
+                        card_ = holder.pop_top_card()
+                        self.add_move([card_], found.pos)  # animate card move to foundation
+                        found.add_card(card_)
                         self.check_win()
                         if isinstance(holder, holders.Pile):
                             holder.open_top_card()

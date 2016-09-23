@@ -2,7 +2,6 @@
 try:
     import sys
     import operator
-    from random import shuffle
 
     from pygame_cards import game_object, card, enums
 except ImportError as err:
@@ -11,8 +10,9 @@ except ImportError as err:
 
 
 class CardsHolder(game_object.GameObject):
-    """ Card holder, to which cards can be added and from which cards can be grabbed and moved to other cards holders.
-    Ex.: a deck of cards, a player's pile of cards. Can be inherited and modified/extended for specific needs.
+    """ Card holder, to which cards can be added and from which cards can be grabbed and moved
+    to other cards holders. Ex.: a deck of cards, a player's pile of cards.
+    Can be inherited and modified/extended for specific needs.
 
     Attributes:
         card_json - The 'card' node of the settings.json. Data can be accessed via [] operator,
@@ -21,18 +21,20 @@ class CardsHolder(game_object.GameObject):
 
     card_json = None
 
-    def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab, last_card_callback=None):
+    def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab,
+                 last_card_callback=None):
         """
         :param pos: tuple with coordinates (x, y) - position of top left corner of cards holder
         :param offset: tuple (x, y) with values of offset between cards in the holder
         :param grab_policy: value from enums.GrabPolicy (by default enums.GrabPolicy.no_grab)
-        :param last_card_callback: function to be called once the last card is removed (by default None)
+        :param last_card_callback: function to be called once the last card removed (default None)
         """
         self.cards = []
         game_object.GameObject.__init__(self, self.cards, grab_policy)
         self.last_card_callback = last_card_callback
         self.pos = pos
         self.offset = offset
+        self.grabbed_card = None
 
     def is_clicked(self, pos):
         """ Checks if a top card is clicked.
@@ -43,7 +45,7 @@ class CardsHolder(game_object.GameObject):
             if self.cards[-1].is_clicked(pos):
                 return True
         elif pos[0] > self.pos[0] and pos[0] < (self.pos[0] + CardsHolder.card_json["size"][0]) and\
-            pos[1] > self.pos[1] and pos[1] < (self.pos[1] + CardsHolder.card_json["size"][1]):
+             pos[1] > self.pos[1] and pos[1] < (self.pos[1] + CardsHolder.card_json["size"][1]):
             return True
         else:
             return False
@@ -61,7 +63,8 @@ class CardsHolder(game_object.GameObject):
     def try_grab_card(self, pos):
         """ Tries to grab a card (or multiple cards) with a mouse click.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
-        :return: List with Card object if grabbed or None if card can't be grabbed or mouse click is not on the holder.
+        :return: List with Card object if grabbed or None if card can't be grabbed or mouse click
+                 is not on the holder.
         """
         grabbed_cards = None
         if len(self.cards) > 0:
@@ -85,7 +88,7 @@ class CardsHolder(game_object.GameObject):
 
     def check_grab(self, pos, bot=False):
         """ Tries to grab a card in specified position.
-        Returns True if card was just grabbed or there is already grabbed card that is not dropped yet.
+        Returns True if card was grabbed or there is already grabbed card that is not dropped yet.
         Otherwise returns False.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
         :param bot: if current player is a 'bot', i.e. virtual adversary (default False)
@@ -113,7 +116,8 @@ class CardsHolder(game_object.GameObject):
                 pos_ = self.pos
                 if len(self.cards) is not 0:
                     length = len(self.cards)
-                    pos_ = self.pos[0] + length * self.offset[0], self.pos[1] + length * self.offset[1]
+                    pos_ = (self.pos[0] + length * self.offset[0],
+                            self.pos[1] + length * self.offset[1])
                 card_.set_pos(pos_)
                 self.cards.append(card_)
             else:
@@ -168,7 +172,7 @@ class CardsHolder(game_object.GameObject):
     def move_all_cards(self, other, back_side_up=True):
         """ Moves all cards to other cards holder.
         :param other: instance of CardsHolder where cards will be moved.
-        :param back_side_up: boolean, True if cards should be flipped to back side up, False otherwise.
+        :param back_side_up: True if cards should be flipped to back side up, False otherwise.
         """
         if isinstance(other, CardsHolder):
             while len(self.cards) != 0:

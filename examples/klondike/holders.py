@@ -24,6 +24,13 @@ class Foundation(card_holder.CardsHolder):
         else:
             return self.cards[-1].suit == card_.suit and card_.rank - self.cards[-1].rank == 1
 
+    def add_card(self, card_):
+        """ Appends a card to the list of self.cards
+        :param card_:  object of the Card class to be appended to the list
+        """
+        if isinstance(card_, card.Card):
+            self.cards.append(card_)
+
     def render(self, screen):
         draw_empty_card_pocket(self, screen)
 
@@ -62,7 +69,7 @@ class GrabbedCardsHolder(card_holder.CardsHolder):
                 self.cards.append(card_)
             else:
                 self.cards.insert(0, card_)
-            #self.update_position(self.offset)
+            # self.update_position(self.offset)
 
     def render(self, screen):
         if len(self.cards) > 0:

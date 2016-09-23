@@ -38,7 +38,7 @@ class MyGameController(controller.Controller):
 
         # All game objects should be added to self objects list
         #  with add_object method in order to be rendered.
-        self.add_object((self.custom_dict["deck"], self.custom_dict["stack"]))
+        self.add_rendered_object((self.custom_dict["deck"], self.custom_dict["stack"]))
 
         # Create Restart button
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
