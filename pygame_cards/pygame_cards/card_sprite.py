@@ -103,7 +103,7 @@ class CardSprite(AbstractPygameCardSprite):
         AbstractPygameCardSprite.__init__(self, pos)
 
         temp_image = pygame.image.load(get_img_full_path(
-                    self.get_image_path(suit, rank))).convert_alpha()
+            self.get_image_path(suit, rank))).convert_alpha()
         self.image = pygame.transform.scale(temp_image, CardSprite.card_json["size"])
         self.rect = self.image.get_rect()
         self.rect[0] = pos[0]
