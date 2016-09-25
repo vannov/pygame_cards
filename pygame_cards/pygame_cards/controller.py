@@ -2,7 +2,8 @@ import abc
 
 from pygame_cards import game_object, card, card_sprite
 
-class Controller:
+
+class Controller(object):
     """ Abstract interface class that controls game logic and handles user events,
         Should be inherited by concrete game controller classes.
 
@@ -16,7 +17,7 @@ class Controller:
             - restart_game()
             - cleanup()
 
-        These methods are called from higher level GameApp class. See details about each method below.
+        These methods are called from high level GameApp class. See details about each method below.
         Other auxiliary methods can be added if needed and called from the mandatory methods.
     """
 
@@ -41,22 +42,23 @@ class Controller:
 
     @abc.abstractmethod
     def build_objects(self):
-        """ Create permanent game objects (deck of cards, players etc.) and GUI elements in this method.
-            This method is executed during creation of GameApp object.
+        """ Create permanent game objects (deck of cards, players etc.) and GUI elements
+            in this method. This method is executed during creation of GameApp object.
         """
         pass
 
     @abc.abstractmethod
     def start_game(self):
-        """ Put game initialization code here. For example: dealing of cards, initialization of game timer etc.
+        """ Put game initialization code here.
+            For example: dealing of cards, initialization of game timer etc.
             This method is triggered by GameApp.execute().
         """
         pass
 
     @abc.abstractmethod
     def process_mouse_event(self, pos, down, double_click):
-        """ Put code that handles mouse events here. For example: grab card from a deck on mouse down event,
-            drop card to a pile on mouse up event etc.
+        """ Put code that handles mouse events here. For example: grab card from a deck on mouse
+            down event, drop card to a pile on mouse up event etc.
             This method is called every time mouse event is detected.
             :param pos: tuple with mouse coordinates (x, y)
             :param down: boolean, True for mouse down event, False for mouse up event
@@ -66,8 +68,8 @@ class Controller:
 
     def execute_game(self):
         """ This method is called in an endless loop started by GameApp.execute().
-        IMPORTANT: do not put any "heavy" computations in this method! It is executed frequently in an endless loop
-        during the app runtime, so any "heavy" code will slow down the performance.
+        IMPORTANT: do not put any "heavy" computations in this method! It is executed frequently in
+        an endless loop during the app runtime, so any "heavy" code will slow down the performance.
         If you don't need to check something at every moment of the game, do not define this method.
 
         Possible things to do in this method:
@@ -80,7 +82,7 @@ class Controller:
     def restart_game(self):
         """ Put code that cleans up any current game progress and starts the game from scratch.
             start_game() method can be called here to avoid code duplication.
-            This method can be used after game over or as a handler of "Restart" button, for example.
+            For example this method can be used after game over or as a handler of "Restart" button.
         """
         pass
 
@@ -115,8 +117,12 @@ class Controller:
         elif isinstance(obj, game_object.GameObject):
             self.rendered_objects.append(obj)
 
-    def remove_rendered_object(self):
+    def remove_rendered_object(self, id_):
+        """ Removes an object from the list of rendered_objects by id
+        :param id_: string with unique object id
+        """
         # TODO: implement
+        _ = id_
         pass
 
     def add_move(self, cards, destination_pos, speed=None):

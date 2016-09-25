@@ -2,18 +2,23 @@ import pygame
 from pygame_cards import card_holder, enums, card
 
 
-def draw_empty_card_pocket(self, screen):
-    if len(self.cards) == 0:
-        rect = (self.pos[0], self.pos[1],
-                card_holder.CardsHolder.card_json["size"][0], card_holder.CardsHolder.card_json["size"][1])
+def draw_empty_card_pocket(holder, screen):
+    """ Renders empty card pocket at the position of CardHolder object
+    :param holder: CardsHolder object
+    :param screen: Screen object to render onto
+    """
+    if len(holder.cards) == 0:
+        rect = (holder.pos[0], holder.pos[1],
+                card_holder.CardsHolder.card_json["size"][0],
+                card_holder.CardsHolder.card_json["size"][1])
         pygame.draw.rect(screen, (77, 77, 77), rect, 2)
 
 
 class Foundation(card_holder.CardsHolder):
     def can_drop_card(self, card_):
         """ Check if a card can be dropped into a foundation. Conditions:
-            - If a pocket is empty, only an ace can be dropped
-            - If a pocket is not empty, only a card of the same suit and lower by 1 rank can be dropped
+        - If a pocket is empty, only an ace can be dropped
+        - If a pocket is not empty, only a card of the same suit and lower by 1 rank can be dropped
         :param card_: Card object to be dropped
         :return: Boolean, True if a card can be dropped, False otherwise
         """
@@ -38,8 +43,9 @@ class Foundation(card_holder.CardsHolder):
 class Pile(card_holder.CardsHolder):
     def can_drop_card(self, card_):
         """ Check if a card can be dropped into a foundation. Conditions:
-            - If a pile is empty, only a King ca be dropped
-            - If a pile is not empty, only a card with opposite suit color and lower by 1 rank can be dropped
+        - If a pile is empty, only a King ca be dropped
+        - If a pile is not empty, only a card with opposite suit color and lower by 1 rank can
+        be dropped
         :param card_: Card object to be dropped
         :return: Boolean, True if a card can be dropped, False otherwise
         """
@@ -55,6 +61,7 @@ class Pile(card_holder.CardsHolder):
                   self.cards[-1].suit in [enums.Suit.hearts, enums.Suit.diamonds]))
 
     def open_top_card(self):
+        """ Flips top card face up. """
         if len(self.cards) > 0 and self.cards[-1].back_up:
             self.cards[-1].flip()
 
@@ -69,12 +76,12 @@ class GrabbedCardsHolder(card_holder.CardsHolder):
                 self.cards.append(card_)
             else:
                 self.cards.insert(0, card_)
-            # self.update_position(self.offset)
 
     def render(self, screen):
         if len(self.cards) > 0:
             self.pos = self.cards[0].get_sprite().pos
             self.update_position(self.offset)
+            _ = screen
 
 
 class DeckDiscard(card_holder.CardsHolder):
@@ -83,5 +90,7 @@ class DeckDiscard(card_holder.CardsHolder):
     """
 
     def render_all(self, screen):
-        """ Override this method from GameObject class in order to not render any cards. """
+        """ Override this method from GameObject class in order to not render any cards.
+        :param screen: Screen to render objects on
+        """
         pass

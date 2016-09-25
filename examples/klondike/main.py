@@ -4,10 +4,10 @@ try:
     import os
     import pygame
 
-    from pygame_cards import game_app, controller, deck, card_holder, enums, card
+    from pygame_cards import game_app, controller, deck, card_holder, enums
     import holders
 except ImportError as err:
-    print "Fail loading a module: %s", err
+    print "Fail loading a module:", err
     sys.exit(2)
 
 
@@ -17,11 +17,11 @@ class KlondikeController(controller.Controller):
         self.custom_dict["deck_discard"].move_all_cards(self.custom_dict["deck"])
         self.custom_dict["stack"].move_all_cards(self.custom_dict["deck"])
 
-        for f in self.custom_dict["foundations"]:
-            f.move_all_cards(self.custom_dict["deck"])
+        for foundation in self.custom_dict["foundations"]:
+            foundation.move_all_cards(self.custom_dict["deck"])
 
-        for p in self.custom_dict["piles"]:
-            p.move_all_cards(self.custom_dict["deck"])
+        for pile in self.custom_dict["piles"]:
+            pile.move_all_cards(self.custom_dict["deck"])
 
         if isinstance(self.gui_interface, game_app.GameApp.GuiInterface):
             self.gui_interface.hide_by_id("win_label1")
@@ -41,14 +41,13 @@ class KlondikeController(controller.Controller):
 
                 self.custom_dict["piles"][i-1].add_card(card_)
 
-        self.game_start_time = pygame.time.get_ticks()
+        self.custom_dict["game_start_time"] = pygame.time.get_ticks()
 
     def build_objects(self):
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
 
         deck_pos = self.settings_json["deck"]["position"]
         deck_offset = self.settings_json["deck"]["offset"]
-        # TODO create callback
         self.custom_dict["deck"] = deck.Deck(enums.DeckType.full, deck_pos, deck_offset, None)
 
         self.custom_dict["deck_discard"] = holders.DeckDiscard()
@@ -79,15 +78,19 @@ class KlondikeController(controller.Controller):
         foundation_inner_offset = self.settings_json["foundation"]["inner_offset"]
         self.custom_dict["foundations"] = []
         for i in range(0, 4):
-            self.custom_dict["foundations"].append(holders.Foundation(foundation_pos, foundation_inner_offset))
-            foundation_pos = foundation_pos[0] + foundation_offset[0], foundation_pos[1] + foundation_offset[1]
+            self.custom_dict["foundations"].append(holders.Foundation(foundation_pos,
+                                                                      foundation_inner_offset))
+            foundation_pos = (foundation_pos[0] + foundation_offset[0],
+                              foundation_pos[1] + foundation_offset[1])
             self.add_rendered_object(self.custom_dict["foundations"][i])
 
-        self.custom_dict["grabbed_cards_holder"] = holders.GrabbedCardsHolder((0, 0), pile_inner_offset)
+        self.custom_dict["grabbed_cards_holder"] = holders.GrabbedCardsHolder((0, 0),
+                                                                              pile_inner_offset)
         self.add_rendered_object(self.custom_dict["grabbed_cards_holder"])
         self.custom_dict["owner_of_grabbed_card"] = None
 
-        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"], "Restart", self.restart_game)
+        self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
+                                       self.restart_game, "Restart")
 
     def check_win(self):
         win = True
@@ -104,9 +107,10 @@ class KlondikeController(controller.Controller):
         text = "You won, congrats!"
         pos = self.settings_json["gui"]["win_label"]
         size = self.settings_json["gui"]["win_text_size"]
-        self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0, id_="win_label1")
-        if hasattr(self, "game_start_time") and self.game_start_time is not None:
-            total_seconds = (pygame.time.get_ticks() - self.game_start_time)/1000
+        self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0,
+                                      id_="win_label1")
+        if hasattr(self, "game_start_time") and self.custom_dict["game_start_time"] is not None:
+            total_seconds = (pygame.time.get_ticks() - self.custom_dict["game_start_time"])/1000
             minutes = str(total_seconds / 60)
             seconds = str(total_seconds % 60)
             if len(seconds) == 1:
@@ -114,7 +118,8 @@ class KlondikeController(controller.Controller):
             game_time = str(minutes) + ":" + str(seconds)
             text = "Game time: " + str(game_time)
             pos = pos[0], pos[1] + size
-            self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0, id_="win_label2")
+            self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0,
+                                          id_="win_label2")
 
     def execute_game(self):
         pass
@@ -136,8 +141,8 @@ class KlondikeController(controller.Controller):
             for obj in self.rendered_objects:
                 grabbed_cards = obj.try_grab_card(pos)
                 if grabbed_cards is not None:
-                    for c in grabbed_cards:
-                        self.custom_dict["grabbed_cards_holder"].add_card(c)
+                    for card_ in grabbed_cards:
+                        self.custom_dict["grabbed_cards_holder"].add_card(card_)
                     self.custom_dict["owner_of_grabbed_card"] = obj
                     break
 
@@ -146,21 +151,23 @@ class KlondikeController(controller.Controller):
             for obj in self.rendered_objects:
                 dropped_cards = False
                 if hasattr(obj, "can_drop_card") and hasattr(obj, "check_collide"):
-                    if obj.check_collide(self.custom_dict["grabbed_cards_holder"].cards[0]) and \
-                            obj.can_drop_card(self.custom_dict["grabbed_cards_holder"].cards[0]):
+                    if (obj.check_collide(self.custom_dict["grabbed_cards_holder"].cards[0]) and
+                            obj.can_drop_card(self.custom_dict["grabbed_cards_holder"].cards[0])):
                         dropped_cards = True
                         while len(self.custom_dict["grabbed_cards_holder"].cards) != 0:
                             obj.add_card(self.custom_dict["grabbed_cards_holder"].pop_bottom_card())
                         break
             if self.custom_dict["owner_of_grabbed_card"] is not None:
                 while len(self.custom_dict["grabbed_cards_holder"].cards) != 0:
-                    self.custom_dict["owner_of_grabbed_card"].add_card(self.custom_dict["grabbed_cards_holder"].pop_bottom_card())
+                    self.custom_dict["owner_of_grabbed_card"].add_card(
+                        self.custom_dict["grabbed_cards_holder"].pop_bottom_card())
                 if dropped_cards:
                     if isinstance(self.custom_dict["owner_of_grabbed_card"], holders.Pile):
                         self.custom_dict["owner_of_grabbed_card"].open_top_card()
                     elif isinstance(self.custom_dict["owner_of_grabbed_card"], holders.Foundation):
                         self.check_win()
                 self.custom_dict["owner_of_grabbed_card"] = None
+                _ = pos
 
     def process_deck_click(self):
         while len(self.custom_dict["stack"].cards) != 0:
@@ -182,14 +189,15 @@ class KlondikeController(controller.Controller):
                 break
             card_.flip()
             self.custom_dict["stack"].add_card(card_)
+            _ = i
 
     def process_double_click(self, pos):
         search_list = self.custom_dict["piles"] + [self.custom_dict["stack"]]
         for holder in search_list:
             if len(holder.cards) != 0 and holder.is_clicked(pos):
-                c = holder.cards[-1]
+                card_ = holder.cards[-1]
                 for found in self.custom_dict["foundations"]:
-                    if found.can_drop_card(c):
+                    if found.can_drop_card(card_):
                         card_ = holder.pop_top_card()
                         self.add_move([card_], found.pos)  # animate card move to foundation
                         found.add_card(card_)

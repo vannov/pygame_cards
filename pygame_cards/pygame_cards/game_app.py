@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 try:
     import sys
-    import os
     import pygame
     import threading
     import json
@@ -33,49 +32,79 @@ class RenderThread(threading.Thread):
             pygame.display.flip()
 
 
-class GameApp:
+class GameApp(object):
     """ Interface game app class that concrete game classes should inherit """
     __metaclass__ = abc.ABCMeta
 
-    class GuiInterface:
+    class GuiInterface(object):
         """ Inner class with GUI interface functions """
         def __init__(self, screen):
             self.screen = screen
             self.gui_list = []
 
         def show_label(self, position, text, text_size=15, color="black", timeout=3, id_=""):
-            label = gui.Title(self.screen, position, text, text_size, color, timeout, id_)
+            """ Creates text label on the screen. The label is stored in the internal gui_list
+            list and gets rendered automatically.
+            :param position: tuple with coordinates (x,y) of top left corner of the label
+            :param text: string with text for the label
+            :param text_size: integer text size
+            :param color: tuple (R, G, B) with text color
+            :param timeout: integer seconds for the label timeout. If equals 0, label won't timeout
+                and should be hidden manually.
+            :param id_: string ID of the label, should be unique for each GUI element
+            :return: object of gui.Label
+            """
+            label = gui.Label(self.screen, position, text, text_size, color, timeout, id_)
             self.gui_list.append(label)
             return label
 
-        def show_button(self, rectangle, text, callback, text_size=15, color="black", id_=""):
+        def show_button(self, rectangle, callback, text, text_size=15, color=(0, 0, 0), id_=""):
+            """ Creates text button on the screen. The button is stored in the internal gui_list
+            list and gets rendered automatically.
+            :param rectangle: list with rectangle properties [x, y, width, height]
+            :param callback: function that will be called when the button is clicked
+            :param text: string with text for the button
+            :param text_size: integer text size
+            :param color: tuple (R, G, B) with text color
+            :param id_: string ID of the button, should be unique for each GUI element
+            :return: object of gui.Button
+            """
             button = gui.Button(self.screen, rectangle, callback, text, text_size, color, id_)
             self.gui_list.append(button)
             return button
 
         def hide_by_id(self, id_):
-            for g in self.gui_list:
-                if hasattr(g, "id") and g.id == id_:
-                    self.gui_list.remove(g)
+            """ Hides and destroys an object of gui.AbstractGUI (Button, Label etc.)
+            :param id_: string with unique ID of GUI element
+            """
+            for element in self.gui_list:
+                if hasattr(element, "id") and element.id_ == id_:
+                    self.gui_list.remove(element)
                     break
 
         def render(self):
-            for g in self.gui_list:
-                if hasattr(g, 'expired') and g.expired:
-                        self.gui_list.remove(g)
-                        continue
-                g.render()
+            """ Renders all current GUI elements in the gui_list. """
+            for element in self.gui_list:
+                if hasattr(element, 'expired') and element.expired:
+                    self.gui_list.remove(element)
+                    continue
+                element.render()
 
         def check_mouse(self, down):
-            for g in self.gui_list:
-                g.check_mouse(pygame.mouse.get_pos(), down)
+            """ Process mouse event for all GUI elements in the gui_list.
+            :param down: boolean, True if mouse down event, False otherwise.
+            """
+            for element in self.gui_list:
+                element.check_mouse(pygame.mouse.get_pos(), down)
 
         def clean(self):
+            """ Destroys all elements in the gui_list. """
             self.gui_list = []
 
     def __init__(self, json_path, game_controller=None):
         """
         :param json_path: path to configuration json file
+        :param game_controller: object of Controller class
         """
         # Windows properties that will be set in load_settings_from_json()
         self.title = None
@@ -142,7 +171,8 @@ class GameApp:
             - Title
             - Background properties
             - Window size
-            Other custom game-specific settings should be set by derived classes in load_game_settings_from_json().
+            Other custom game-specific settings should be set by derived classes in
+            load_game_settings_from_json().
         """
         self.title = self.settings_json["window"]["title"]
         self.background_color = self.settings_json["window"]['background_color']
@@ -152,13 +182,9 @@ class GameApp:
         card_holder.CardsHolder.card_json = self.settings_json["card"]
         card_sprite.CardSprite.card_json = self.settings_json["card"]
 
-    # @abc.abstractmethod
-    # def init_gui(self):
-    #     """ Initializes default GUI elements. Should be overloaded in derived classes. """
-    #     pass
-
     def process_mouse_event(self, down, double_click=False):
-        """ Processes mouse events, invoke mouse events handlers in game_controller and gui_interfaces
+        """ Processes mouse events, invokes mouse events handlers in game_controller
+            and gui_interfaces
         :param down: boolean, True for mouse down event, False for mouse up event
         :param double_click: boolean, True if it's a double click event
         """
@@ -195,7 +221,6 @@ class GameApp:
             self.clock.tick(60)
             self.process_events()
             self.execute_game_logic()
-            #self.render()
 
     def execute(self):
         """ Initializes game, starts rendering thread and starts game endless loop """

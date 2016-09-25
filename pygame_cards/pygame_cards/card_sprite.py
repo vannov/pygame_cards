@@ -181,7 +181,7 @@ class CardSprite(AbstractPygameCardSprite):
 #         self.image = pygame.transform.scale(temp_image, globals.Size.card)
 
 
-class SpriteMove:
+class SpriteMove(object):
     """
     Class that animates a card move. Can be used to animate automatic cards' moves,
     for example during cards dealing.
@@ -207,13 +207,13 @@ class SpriteMove:
             sprite.completed = False
 
     @staticmethod
-    def calc_distance(p1, p2):
+    def calc_distance(point1, point2):
         """ Calculates distance between two points.
-        :param p1: tuple (x, y) with coordinates of the first point
-        :param p2: tuple (x, y) with coordinates of the second point
+        :param point1: tuple (x, y) with coordinates of the first point
+        :param point2: tuple (x, y) with coordinates of the second point
         :return: distance between two points in pixels
         """
-        return math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
+        return math.sqrt(math.pow(point1[0] - point2[0], 2) + math.pow(point1[1] - point2[1], 2))
 
     def update(self):
         """
@@ -222,10 +222,10 @@ class SpriteMove:
         :return: True is move to destination position is completed, otherwise returns False.
         """
         for sprite in self.sprites:
-            new_pos = sprite.pos[0] + sprite.speed * math.cos(sprite.angle), \
-                      sprite.pos[1] + sprite.speed * math.sin(sprite.angle)
-            d = SpriteMove.calc_distance(new_pos, sprite.start_pos)
-            if d < sprite.distance:
+            new_pos = (sprite.pos[0] + sprite.speed * math.cos(sprite.angle),
+                       sprite.pos[1] + sprite.speed * math.sin(sprite.angle))
+            distance = SpriteMove.calc_distance(new_pos, sprite.start_pos)
+            if distance < sprite.distance:
                 sprite.pos = new_pos
             else:
                 sprite.pos = self.dest_pos

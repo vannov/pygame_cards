@@ -42,7 +42,7 @@ class MyGameController(controller.Controller):
 
         # Create Restart button
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
-                                       "Restart", self.restart_game)
+                                       self.restart_game, "Restart")
 
     def start_game(self):
         """ Put game initialization code here.

@@ -17,23 +17,20 @@ class Deck(card_holder.CardsHolder):
         """
         :param type_: int value that corresponds to enum from enums.DeckType class
         :param pos: tuple with coordinates (x, y) for bottom card in the desk
-        :param last_card_callback: function that should be called when the last card is removed from the deck
+        :param last_card_callback: function that should be called when the last card is
+            removed from the deck
         """
         card_holder.CardsHolder.__init__(self, pos, offset, False, last_card_callback)
         self.type = type_
 
-        start = 0
+        start = enums.Rank.two  # full deck type by default
         if type_ == enums.DeckType.short:
             start = enums.Rank.six
-        elif type_ == enums.DeckType.full:
-            start = enums.Rank.two
-        else:
-            assert "Deck type invalid"  # TODO: remove?
 
         card_pos = pos
-        for r in range(start, enums.Rank.ace + 1):
-            for s in range(enums.Suit.hearts, enums.Suit.spades + 1):
-                self.cards.append(card.Card(s, r, card_pos, True))
+        for rank in range(start, enums.Rank.ace + 1):
+            for suit in range(enums.Suit.hearts, enums.Suit.spades + 1):
+                self.cards.append(card.Card(suit, rank, card_pos, True))
                 card_pos = card_pos[0] + self.offset[0], card_pos[1] + self.offset[1]
 
     def shuffle(self):

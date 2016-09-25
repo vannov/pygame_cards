@@ -1,5 +1,6 @@
 import abc
 
+from pygame_cards import enums
 
 class GameObject:
     """ Game object interface, implements Composite design pattern.
@@ -7,7 +8,7 @@ class GameObject:
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, children=[], grab_policy=0):
+    def __init__(self, children=[], grab_policy=enums.GrabPolicy.no_grab):
         """
         :param children: list of children objects
         """
@@ -23,17 +24,18 @@ class GameObject:
 
     def render_all(self, screen):
         """ Renders current object and children objects.
-            Internally calls abstract method _render() that should be implemented in derived classes.
+            Internally calls abstract method render() that should be implemented in derived classes.
         :param screen: Screen to render objects on
         """
-        for ch in self.children:
-            ch.render(screen)
+        for child in self.children:
+            child.render(screen)
         self.render(screen)
 
     @abc.abstractmethod
     def render(self, screen):
         """ Renders current object. Should be implemented in each derived class.
-            This method should not care about children objects, they are processed by higher-level render() method.
+            This method should not care about children objects, they are processed by higher-level
+            render() method.
         :param screen: Screen to render objects on
         """
         pass
