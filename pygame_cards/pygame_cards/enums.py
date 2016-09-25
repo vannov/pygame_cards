@@ -1,5 +1,10 @@
-from enum import IntEnum
-
+#!/usr/bin/env python
+try:
+    import sys
+    from enum import IntEnum
+except ImportError as err:
+    print "Fail loading a module in file:", __file__, "\n", err
+    sys.exit(2)
 
 class Rank(IntEnum):
     """ Enums for cards' ranks """

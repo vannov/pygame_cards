@@ -8,7 +8,7 @@ try:
 
     from pygame_cards import enums
 except ImportError as err:
-    print "Fail loading a module: %s", err
+    print "Fail loading a module in file:", __file__, "\n", err
     sys.exit(2)
 
 

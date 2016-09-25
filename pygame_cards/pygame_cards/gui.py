@@ -1,11 +1,11 @@
-#!usr/bin/env python
+#!/usr/bin/env python
 try:
     import sys
     import abc
     import pygame
     from threading import Timer
 except ImportError as err:
-    print "Fail loading a module: %s", err
+    print "Fail loading a module in file:", __file__, "\n", err
     sys.exit(2)
 
 

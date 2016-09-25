@@ -10,7 +10,7 @@ try:
 
     from pygame_cards import controller, card_holder, card_sprite
 except ImportError as err:
-    print "Fail loading a module: %s", err
+    print "Fail loading a module in file:", __file__, "\n", err
     sys.exit(2)
 
 

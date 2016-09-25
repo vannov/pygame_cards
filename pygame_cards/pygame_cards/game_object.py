@@ -1,8 +1,15 @@
-import abc
+#!/usr/bin/env python
+try:
+    import sys
+    import abc
 
-from pygame_cards import enums
+    from pygame_cards import enums
+except ImportError as err:
+    print "Fail loading a module in file:", __file__, "\n", err
+    sys.exit(2)
 
-class GameObject:
+
+class GameObject(object):
     """ Game object interface, implements Composite design pattern.
         An instance can be a single object (e.g. card) or a structure of objects (e.g. deck).
     """

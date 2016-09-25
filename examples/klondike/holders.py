@@ -1,5 +1,11 @@
-import pygame
-from pygame_cards import card_holder, enums, card
+try:
+    import sys
+    import pygame
+
+    from pygame_cards import card_holder, enums, card
+except ImportError as err:
+    print "Fail loading a module in file:", __file__, "\n", err
+    sys.exit(2)
 
 
 def draw_empty_card_pocket(holder, screen):
