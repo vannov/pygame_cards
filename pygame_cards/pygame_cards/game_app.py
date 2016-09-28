@@ -33,7 +33,7 @@ class RenderThread(threading.Thread):
 
 
 class GameApp(object):
-    """ Interface game app class that concrete game classes should inherit """
+    """ GameApp class controls the application flow and settings. """
     __metaclass__ = abc.ABCMeta
 
     class GuiInterface(object):
