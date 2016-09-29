@@ -8,4 +8,5 @@ setup(name='pygame_cards',
       author_email='van.novosad@gmail.com',
       license='MIT',
       packages=['pygame_cards'],
+      include_package_data=True,
       zip_safe=False)
