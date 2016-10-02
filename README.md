@@ -14,6 +14,8 @@ Check out the _examples_ folder - it contains implementation of classic "Klondik
 Python version 2.7.x: https://www.python.org/downloads/
 Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
+There is a known Pygame issue with OS X El Capitan and newer. Because of different versions of SDL_image library, images rendered in a Pygame application look corrupted. The workaround is to downgrade to an older version of SDL_image library. See instructions here: http://stackoverflow.com/a/35385411
+
 ####Installation from distributable:
 
 On Mac OS or Linux:
@@ -27,7 +29,7 @@ pip install pygame_cards-0.1.zip
 ```
 
 ####Installation from sources:
-To install the **pygame_cards** framework, download this repository, in terminal cd into _pygame_cards_ folder and run this command:
+To install the **pygame_cards** framework, download this repository, in terminal cd into _pygame_cards_ folder and run command:
 
 ```
 python setup.py install
@@ -47,17 +49,28 @@ There are also _mygame_example.py_ and _settings_example.json_ files in the _exa
 ### JSON settings file
 
 JSON file contains settings used by the framework routines. The path to the json file should be specified when creating an object of GameApp class. Mandatory fields for the JSON file are:
-- **"window"** with sub-fields: "size", "title", "background_color".
-- **"card"** with sub-fields: "size", "front_sprite_path", "back_sprite_file", "move_speed".
+- **"window"** with sub-fields: 
+    - **"size":** list of 2 integers – width and height of app window in pixels
+    - **"title":** string with app title
+    - **"background_color"**: list with 3 integers that represent a color  – R, G, B
+- **"card"** with sub-fields: 
+    - **"size"**: list of 2 integers – width and height of game card
+    - **"front_sprite_path"**: string with path to folder with card sprite
+    - **"back_sprite_file"**: string with path to file with card back side sprite
+    - **"move_speed"**: integer with speed of card move animation, in pixels per frame
+ 
+**Note:** paths in "front_sprite_path" and "back_sprite_file" should be relative to folder with pygame_cards framework. Default sprites are included in the framework and are located under _img_ folder. If you are going to use custom sprites for cards, you need to follow the naming convention for your sprite files as under _img/cards_ folder (e.g. "2_of_clubs.png", "ace_of_diamonds.png" etc).
  
 These fields should be filled with project specific data. You can also add any amount of custom fields in that file and use them in your code via **settings_json** member of a class derived from the Controller class. For example, see how custom fields "deck", "stack" and "gui" in _mygame_example.py_ in _examples/template_ folder.
+
+If some or all of the mandatory fields are missing, the framework will use default values for these fields. Here is JSON with default values of the mandatory fields (_settings.json_ from _examples/template_ folder):
 
 Example:
 
 ```
 {
 	"window": {
-		"size": [680, 400],
+		"size": [570, 460],
 		"title": "My Game",
 		"background_color": [0, 153, 0]
 	},
@@ -65,19 +78,8 @@ Example:
 		"size": [65, 85],
 		"front_sprite_path": "img/cards/",
 		"back_sprite_file": "img/back-side.png",
-		"move_speed": 50
-	},
-	"deck": {
-		"position": [10, 10],
-		"offset": [0.2, 0]
-	},
-	"stack": {
-        "position": [90, 10],
-        "offset": [15, 0]
-    },
-    "gui": {
-        "restart_button": [10, 360, 50, 25]
-    }
+		"move_speed": 80
+	}
 }
 ```
 
