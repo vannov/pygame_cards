@@ -5,6 +5,7 @@ try:
     import threading
     import json
     import abc
+    import logging
 
     import gui
 
@@ -30,6 +31,96 @@ class RenderThread(threading.Thread):
             self.app.clock.tick(300)
             self.app.render()
             pygame.display.flip()
+
+
+class JsonHelper:
+    """ Contains JSON helper methods used by GameApp class. """
+
+    @staticmethod
+    def load_json(path):
+        """ Loads json file and returns handle to it
+        :param path: path to json file to load
+        :return: dictionary retrieved from json parsing
+        """
+        with open(path, 'r') as json_file:
+            json_dict = json.load(json_file)
+            return JsonHelper.validate_json(json_dict, path)
+
+    @staticmethod
+    def validate_json_field(self, args):
+        # TODO: implememt and use in validate_json to avoid code duplication
+        pass
+
+    @staticmethod
+    def check_field(field, dict_, type_, default):
+        """ Checks is a field present and is its value valid. Sets a default value if needed.
+        :param field: string with field name
+        :param dict_: dictionary in which the field should be checked
+        :param type_: expected type of the field
+        :param default: default value of the field
+        """
+        if not (field in dict_ and isinstance(dict_[field], type_)):
+            JsonHelper.log_json_field_warning(field, default)
+            dict_[field] = default
+
+    @staticmethod
+    def validate_json(json_dict, path=""):
+        """ Validates mandatory field in json_dict. Adds default values if some values are
+            missing or incorrect.
+        :param json_dict: dictionary retrieved from json parsing
+        :param path: path to the json file (needed for logging only)
+        :return: dictionary same as input json_dict if all mandatory fields are good,
+                or modified dictionary with default values added.
+        """
+        if json_dict is not None:
+            # Validate "window"
+            if "window" in json_dict and isinstance(json_dict["window"], dict):
+                JsonHelper.check_field("title", json_dict["window"], basestring, "My Game test")
+                JsonHelper.check_field("size", json_dict["window"], list, [570, 460])
+                JsonHelper.check_field("background_color", json_dict["window"], list, [0, 153, 0])
+            else:
+                JsonHelper.log_json_field_warning("window", path)
+                window_dict = {
+                    "size": [570, 460],
+                    "title": "Klondike",
+                    "background_color": [0, 153, 0]
+                }
+                setattr(json_dict, "window", window_dict)
+
+            # Validate "card"
+            if "card" in json_dict and isinstance(json_dict["card"], dict):
+                JsonHelper.check_field("size", json_dict["card"], list, [65, 85])
+                JsonHelper.check_field("front_sprite_path", json_dict["card"], basestring,
+                                       "img/cards/")
+                JsonHelper.check_field("back_sprite_file", json_dict["card"], basestring,
+                                       "img/back-side.png")
+                JsonHelper.check_field("move_speed", json_dict["card"], int, 80)
+            else:
+                JsonHelper.log_json_field_warning("card", path)
+                card_dict = {
+                    "size": [65, 85],
+                    "front_sprite_path": "img/cards/",
+                    "back_sprite_file": "img/back-side.png",
+                    "move_speed": 80
+                }
+                setattr(json_dict, "card", card_dict)
+
+        return json_dict
+
+    @staticmethod
+    def log_json_field_warning(field, default = None, path=""):
+        """ Logs message about missing or incorrect mandatory field in settings JSON file.
+        :param field: string with field name
+        :param default value of the field
+        :param path: path to JSON file
+        """
+        message = " '" + field
+        message += "' structure is missing or invalid in the JSON! Using default value"
+        if default is not None:
+            message += ": " + str(default)
+        if path != "":
+            message += "\nJSON file path: " + path
+        logging.warning(message)
 
 
 class GameApp(object):
@@ -111,7 +202,7 @@ class GameApp(object):
         self.background_color = None
         self.size = None
 
-        self.settings_json = self.load_json(json_path)
+        self.settings_json = JsonHelper.load_json(json_path)
         if self.settings_json is None:
             raise ValueError('settings.json file is not loaded', 'GameApp.__init__')
         self.load_settings_from_json()
@@ -155,15 +246,6 @@ class GameApp(object):
                 self.process_mouse_event(False, self.is_double_click())
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.process_mouse_event(True)
-
-    @staticmethod
-    def load_json(path):
-        """ Loads json file and returns handle to it
-        :param path: path to json file to load
-        :return: handle to loaded json file
-        """
-        with open(path, 'r') as json_file:
-            return json.load(json_file)
 
     def load_settings_from_json(self):
         """ Parses configuration json file and sets properties with values from the json.

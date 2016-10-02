@@ -10,11 +10,23 @@ Check out the _examples_ folder - it contains implementation of classic "Klondik
 
 ## Installation 
 
-Prerequisites:
+####Prerequisites:
 Python version 2.7.x: https://www.python.org/downloads/
 Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
+####Installation from distributable:
 
+On Mac OS or Linux:
+```
+sudo pip install pygame_cards-0.1.tar.gz
+```
+
+On Windows:
+```
+pip install pygame_cards-0.1.zip
+```
+
+####Installation from sources:
 To install the **pygame_cards** framework, download this repository, in terminal cd into _pygame_cards_ folder and run this command:
 
 ```
