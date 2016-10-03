@@ -2,15 +2,17 @@
 try:
     import sys
     from pygame_cards import card_sprite
+    from pygame_cards import game_object
 except ImportError as err:
-    print "Fail loading a module: %s", err
+    print "Fail loading a module in file:", __file__, "\n", err
     sys.exit(2)
 
 
-class Card:
+class Card(game_object.GameObject):
     """ This class represents a card. """
 
-    def __init__(self, suit, rank, pos, back_up = False):
+    def __init__(self, suit, rank, pos, back_up=False):
+        game_object.GameObject.__init__(self)
         self.suit = suit
         self.rank = rank
         self.sprite = card_sprite.CardSprite(suit, rank, pos, back_up)
@@ -37,25 +39,42 @@ class Card:
         self.back_up = not self.back_up
         self.sprite.flip()
 
+    def is_clicked(self, pos):
+        """ Checks if mouse click is on card
+        :param pos: tuple with coordinates of mouse click (x, y)
+        :return: True if card is clicked, False otherwise
+        """
+        return self.sprite.is_clicked(pos)
+
+    def unclick(self):
+        """ Marks card as unclicked, i.e. it won't stick to the mouse cursor """
+        self.sprite.clicked = False
+
     def check_mouse(self, pos, down):
         """ Checks if mouse event affects the card and if so processes the event.
         :param pos: tuple with coordinates of mouse event (x, y)
         :param down: boolean, should be True for mouse down event, False for mouse up event
         :return: True if passed mouse event affects the card, False otherwise.
+
         """
         return self.sprite.check_mouse(pos, down)
 
-    def check_collide(self, card):
-        """ Checks if current card's sprite collides with other card's sprite
-        :param card: Card object to check collision with
-        :return: True if cards collide, False otherwise
+    def check_collide(self, card_=None, pos=None):
+        """ Checks if current card's sprite collides with other card's sprite, or with
+        an rectangular area with size of a card. Parameters card and pos are mutually exclusive.
+        :param card_: Card object to check collision with
+        :param pos: tuple with coordinates (x,y) - top left corner of area to check collision with
+        :return: True if cards/card and area collide, False otherwise
         """
-        return self.sprite.check_collide(card.sprite)
+        if card_ is not None:
+            return self.sprite.check_card_collide(card_.sprite)
+        elif pos is not None:
+            return self.sprite.check_area_collide(pos)
 
     def set_pos(self, pos):
         """ Sets position of the card's sprite
-        :param pos: tuple with coordinates (x, y) where the top left corner of the card should be placed
-        :return:
+        :param pos: tuple with coordinates (x, y) where the top left corner of the card
+                    should be placed.
         """
         self.sprite.pos = pos
         #self.back_sprite.set_pos(pos)

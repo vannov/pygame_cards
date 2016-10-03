@@ -1,0 +1,13 @@
+{
+	"window": {
+		"size": [570, 460],
+		"title": "My Game",
+		"background_color": [0, 153, 0]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "img/cards/",
+		"back_sprite_file": "img/back-side.png",
+		"move_speed": 80
+	}
+}

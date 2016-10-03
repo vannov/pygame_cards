@@ -1,0 +1,36 @@
+{
+	"window": {
+		"size": [570, 460],
+		"title": "Klondike",
+		"background_color": [0, 153, 0]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "img/cards/",
+		"back_sprite_file": "img/back-side.png",
+		"move_speed": 80
+	},
+	"deck": {
+		"position": [10, 10],
+		"offset": [0.2, 0]
+	},
+    "stack": {
+        "deck_offset": [15, 0],
+        "inner_offset": [20, 0]
+    },
+	"pile": {
+        "position": [10, 120],
+        "offset": [80, 0],
+		"inner_offset": [0, 20]
+	},
+    "foundation": {
+        "position": [250, 10],
+        "offset": [80, 0],
+		"inner_offset": [0, 0]
+    },
+    "gui": {
+        "restart_button": [10, 425, 50, 25],
+        "win_label": [150, 240],
+		"win_text_size": 30
+    }
+}

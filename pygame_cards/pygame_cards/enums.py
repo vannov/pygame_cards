@@ -1,7 +1,13 @@
-from enum import IntEnum
+#!/usr/bin/env python
+try:
+    import sys
+    #from enum import IntEnum
+except ImportError as err:
+    print "Fail loading a module in file:", __file__, "\n", err
+    sys.exit(2)
 
 
-class Rank(IntEnum):
+class Rank:
     """ Enums for cards' ranks """
     two = 2
     three = 3
@@ -18,7 +24,7 @@ class Rank(IntEnum):
     ace = 14
 
 
-class Suit(IntEnum):
+class Suit:
     """ Enums for cards' suits """
     hearts = 0
     diamonds = 1
@@ -26,13 +32,20 @@ class Suit(IntEnum):
     spades = 3
 
 
-class DeckType(IntEnum):
+class DeckType:
     """ Enums for deck types.
     short - 6,7...,King,Ace
     full - 2,3...,King,Ace
     """
     short = 36,
     full = 52
+
+
+class GrabPolicy:
+    """ Enums for different grab policies of cards' holders."""
+    no_grab = 0,
+    can_single_grab = 1,
+    can_multi_grab = 2
 
 
 def get_suit_string_from_enum(suit):
