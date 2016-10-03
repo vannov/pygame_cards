@@ -6,7 +6,7 @@ The package contains a set of modules that encapsulate Pygame routines and provi
 
 Check out the _examples_ folder - it contains implementation of classic "Klondike" solitaire. Here how the game looks like:
 
-<img src="https://github.com/vannov/pygame_cards/blob/int/examples/klondike/klondike.png" width="570" height="470"/>
+<img src="https://github.com/vannov/pygame_cards/blob/master/examples/klondike/klondike.png" width="570" height="470"/>
 
 ## Installation 
 
@@ -18,14 +18,16 @@ Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
 There is a known Pygame issue with OS X El Capitan and newer. Because of different versions of SDL_image library, images rendered in a Pygame application look corrupted. The workaround is to downgrade to an older version of SDL_image library. See instructions here: http://stackoverflow.com/a/35385411
 
-####Installation from distributable:
+####Installation from redistributable:
 
-On Mac OS or Linux:
+Download archive with latest available version of **pygame_cards** package from https://github.com/vannov/pygame_cards/releases. Install the package:
+
+- On Mac OS or Linux:
 ```
 sudo pip install pygame_cards-0.1.tar.gz
 ```
 
-On Windows:
+- On Windows (run command prompt as administrator):
 ```
 pip install pygame_cards-0.1.zip
 ```
