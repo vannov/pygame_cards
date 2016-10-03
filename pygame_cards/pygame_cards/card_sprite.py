@@ -13,17 +13,20 @@ except ImportError as err:
 
 
 def get_img_full_path(path):
-    """ Returns image full path in dev mode. In prod mode does nothing, returns the argument value.
-    :param path: Relative path to the image.
-    :return: Full path in dev mode. In production mode returns value of the argument.
+    """ Checks if file can be found by path specified in the input. Returns the same as input
+    if can find, otherwise joins current directory full path with path from input and returns it.
+    :param path: Relative of full path to the image.
+    :return: Relative of full path to the image (joined with path to current directory if needed).
     """
-    if __debug__:
-        # In dev mode use full file path
-        directory = os.path.dirname(__file__)
-        return os.path.join(directory, path)
-    else:
-        # In production environment use relative path from json
+    if os.path.isfile(path):
         return path
+    else:
+        directory = os.path.dirname(__file__)
+        new_path = os.path.join(directory, path)
+        if os.path.isfile(new_path):
+            return new_path
+        else:
+            raise IOError("File not found: " + path)
 
 
 class AbstractPygameCardSprite(pygame.sprite.Sprite):

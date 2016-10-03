@@ -64,9 +64,6 @@ JSON file contains settings used by the framework routines. The path to the json
 These fields should be filled with project specific data. You can also add any amount of custom fields in that file and use them in your code via **settings_json** member of a class derived from the Controller class. For example, see how custom fields "deck", "stack" and "gui" in _mygame_example.py_ in _examples/template_ folder.
 
 If some or all of the mandatory fields are missing, the framework will use default values for these fields. Here is JSON with default values of the mandatory fields (_settings.json_ from _examples/template_ folder):
-
-Example:
-
 ```
 {
 	"window": {
@@ -122,7 +119,38 @@ def main():
 
 ## Deployment
 
-placeholder...
+To create a standalone application from your game, you can use one of third-party tools available, for example: 
+- py2app (Mac OS X) https://pythonhosted.org/py2app/
+- py2exe (Windows) http://www.py2exe.org/index.cgi/Tutorial
+- PyInstaller (Windows, Linux, Mac OS X) http://www.pyinstaller.org/
+
+**Important:** Make sure to include paths to your settings.json file and sprites folder to the package data when exporting your game to an executable. Default cards' sprites files live in the pygame_cards framework folder under __img__.
+
+Example of creating a Mac OS X app with py2app:
+1. Install py2app, see instructions here: https://pythonhosted.org/py2app/install.html
+2. In terminal "cd" to your project location and create **setup.py** script with command (replace "main.py" with your entry point file name):
+  ```
+  py2applet --make-setup main.py
+  ```
+3. Add paths to the settings.json and cards sprites folder to the created setup.py file (added lines in **bold**):
+  ```python
+    from setuptools import setup
+    
+    APP = ['main.py']
+    **DATA_FILES = ['/Library/Python/2.7/site-packages/pygame_cards/img', 'settings.json']**
+    OPTIONS = {'argv_emulation': True}
+    
+    setup(
+        app=APP,
+        **data_files=DATA_FILES,**
+        options={'py2app': OPTIONS},
+        setup_requires=['py2app'],
+    )
+  ```
+4. Create application with command: 
+ ```
+ python setup.py py2app
+ ```
 
 ## License
 
