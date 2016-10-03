@@ -13,6 +13,7 @@ Check out the _examples_ folder - it contains implementation of classic "Klondik
 ####Prerequisites:
 
 Python version 2.7.x: https://www.python.org/downloads/
+
 Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
 There is a known Pygame issue with OS X El Capitan and newer. Because of different versions of SDL_image library, images rendered in a Pygame application look corrupted. The workaround is to downgrade to an older version of SDL_image library. See instructions here: http://stackoverflow.com/a/35385411
@@ -125,15 +126,18 @@ To create a standalone application from your game, you can use one of third-part
 - py2exe (Windows) http://www.py2exe.org/index.cgi/Tutorial
 - PyInstaller (Windows, Linux, Mac OS X) http://www.pyinstaller.org/
 
-**Important:** Make sure to include paths to your settings.json file and sprites folder to the package data when exporting your game to an executable. Default cards' sprites files live in the pygame_cards framework folder under __img__.
+**Important:** Make sure to include paths to your settings.json file and sprites folder to the package data when exporting your game to an executable. Default cards' sprites files live in the pygame_cards framework under _img_ folder.
 
 Example of creating a Mac OS X app with py2app:
 
 1. Install py2app, see instructions here: https://pythonhosted.org/py2app/install.html
+
 2. In terminal "cd" to your project location and create **setup.py** script with command (replace "main.py" with your entry point file name):
+
   ```
   py2applet --make-setup main.py
   ```
+
 3. Add paths to the settings.json and cards sprites folder to the created setup.py file (added lines marked with "**ADDED**" comment):
   ```python
     from setuptools import setup
@@ -149,7 +153,9 @@ Example of creating a Mac OS X app with py2app:
         setup_requires=['py2app'],
     )
   ```
+
 4. Create application with command: 
+
  ```
  python setup.py py2app
  ```
