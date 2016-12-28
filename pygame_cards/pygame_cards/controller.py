@@ -14,9 +14,8 @@ class Controller(object):
         Should be inherited by concrete game controller classes.
 
         Following methods are mandatory for all classes that derive from Controller:
-            - build_objects()
             - start_game()
-            - process_mouse_events()
+            - process_mouse_event()
 
         Also these methods are not mandatory, but it can be helpful to define them:
             - execute_game()
@@ -42,16 +41,6 @@ class Controller(object):
         self.gui_interface = gui_interface
         self.settings_json = settings_json
         self.started = False
-
-        # Dictionary where any custom objects needed can be stored
-        self.custom_dict = dict()
-
-    @abc.abstractmethod
-    def build_objects(self):
-        """ Create permanent game objects (deck of cards, players etc.) and GUI elements
-            in this method. This method is executed during creation of GameApp object.
-        """
-        pass
 
     @abc.abstractmethod
     def start_game(self):

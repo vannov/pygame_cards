@@ -8,7 +8,6 @@ class MyGameController(controller.Controller):
     """ Main class that controls game logic and handles user events.
 
         Following methods are mandatory for all classes that derive from Controller:
-            - build_objects()
             - start_game()
             - process_mouse_events()
 
@@ -22,23 +21,20 @@ class MyGameController(controller.Controller):
         Other auxiliary methods can be added if needed and called from the mandatory methods.
     """
 
-    def build_objects(self):
-        """ Create permanent game objects (deck of cards, players etc.) and
-        GUI elements in this method. This method is executed during creation of GameApp object.
-        """
+    def __init__(self, objects_list=None, gui_interface=None, settings_json=None):
+        super(MyGameController, self).__init__(objects_list=objects_list, gui_interface=gui_interface, settings_json=settings_json)
 
         deck_pos = self.settings_json["deck"]["position"]
         deck_offset = self.settings_json["deck"]["offset"]
-        self.custom_dict["deck"] = deck.Deck(type_=enums.DeckType.short,
-                                             pos=deck_pos, offset=deck_offset)
+        self.deck = deck.Deck(type_=enums.DeckType.short, pos=deck_pos, offset=deck_offset)
 
         stack_pos = self.settings_json["stack"]["position"]
         stack_offset = self.settings_json["stack"]["offset"]
-        self.custom_dict["stack"] = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
+        self.stack = card_holder.CardsHolder(pos=stack_pos, offset=stack_offset)
 
         # All game objects should be added to self objects list
         #  with add_object method in order to be rendered.
-        self.add_rendered_object((self.custom_dict["deck"], self.custom_dict["stack"]))
+        self.add_rendered_object((self.deck, self.stack))
 
         # Create Restart button
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
@@ -51,7 +47,7 @@ class MyGameController(controller.Controller):
         """
 
         # Shuffle cards in the deck
-        self.custom_dict["deck"].shuffle()
+        self.deck.shuffle()
 
     def process_mouse_event(self, pos, down, double_click):
         """ Put code that handles mouse events here.
@@ -62,18 +58,18 @@ class MyGameController(controller.Controller):
             :param down: boolean, True for mouse down event, False for mouse up event
             :param double_click: boolean, True if it's a double click event
         """
-        if down and self.custom_dict["deck"].is_clicked(pos):
-            card_ = self.custom_dict["deck"].pop_top_card()
+        if down and self.deck.is_clicked(pos):
+            card_ = self.deck.pop_top_card()
             if isinstance(card_, card.Card):
                 card_.flip()
-                self.custom_dict["stack"].add_card(card_)
+                self.stack.add_card(card_)
 
     def restart_game(self):
         """ Put code that cleans up any current game progress and starts the game from scratch.
             start_game() method can be called here to avoid code duplication. For example,
             This method can be used after game over or as a handler of "Restart" button.
         """
-        self.custom_dict["stack"].move_all_cards(self.custom_dict["deck"])
+        self.stack.move_all_cards(self.deck)
         self.start_game()
 
     def execute_game(self):
@@ -94,8 +90,8 @@ class MyGameController(controller.Controller):
         """ Called when user closes the app.
             Add destruction of all objects, storing of game progress to a file etc. to this method.
         """
-        del self.custom_dict["deck"]
-        del self.custom_dict["stack"]
+        del self.deck
+        del self.stack
 
 
 def main():
@@ -105,9 +101,9 @@ def main():
     json_path = os.path.join(os.getcwd(), 'settings_example.json')
 
     # Create an instance of GameApp and pass a path to setting json file
-    # and an instance of custom Controller object. This will initialize the game,
-    # build_objects() from Controller will be called at this step.
-    solitaire_app = game_app.GameApp(json_path=json_path, game_controller=MyGameController())
+    # and a subclass of Controller. This will initialize the game,
+    # and instantiate the Controller.
+    solitaire_app = game_app.GameApp(json_path=json_path, controller_cls=MyGameController)
 
     # Start executing the game. This will call start_game() from Controller,
     # then will be calling execute_game() in an endless loop.
