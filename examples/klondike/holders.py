@@ -35,21 +35,14 @@ class Foundation(card_holder.CardsHolder):
         else:
             return self.cards[-1].suit == card_.suit and card_.rank - self.cards[-1].rank == 1
 
-    def add_card(self, card_):
-        """ Appends a card to the list of self.cards
-        :param card_:  object of the Card class to be appended to the list
-        """
-        if isinstance(card_, card.Card):
-            self.cards.append(card_)
-
     def render(self, screen):
         draw_empty_card_pocket(self, screen)
 
 
 class Pile(card_holder.CardsHolder):
     def can_drop_card(self, card_):
-        """ Check if a card can be dropped into a foundation. Conditions:
-        - If a pile is empty, only a King ca be dropped
+        """ Check if a card can be dropped into a pile. Conditions:
+        - If a pile is empty, only a King can be dropped
         - If a pile is not empty, only a card with opposite suit color and lower by 1 rank can
         be dropped
         :param card_: Card object to be dropped
@@ -76,6 +69,7 @@ class Pile(card_holder.CardsHolder):
 
 
 class GrabbedCardsHolder(card_holder.CardsHolder):
+    """Holds cards currently grabbed by the user (ie under the mouse with the button held down)"""
     def add_card(self, card_, on_top=False):
         if isinstance(card_, card.Card):
             if on_top:
