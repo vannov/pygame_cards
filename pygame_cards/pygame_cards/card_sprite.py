@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division
+
 try:
     import sys
     import os
@@ -8,7 +8,7 @@ try:
 
     from pygame_cards import enums
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 

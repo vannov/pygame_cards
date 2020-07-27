@@ -5,11 +5,11 @@ try:
 
     from pygame_cards import game_object, card, card_sprite
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
-class Controller(object):
+class Controller(object, metaclass=abc.ABCMeta):
     """ Abstract interface class that controls game logic and handles user events,
         Should be inherited by concrete game controller classes.
 
@@ -26,8 +26,6 @@ class Controller(object):
         These methods are called from high level GameApp class. See details about each method below.
         Other auxiliary methods can be added if needed and called from the mandatory methods.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, objects_list=None, gui_interface=None, settings_json=None):
         """

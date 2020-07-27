@@ -7,11 +7,11 @@ try:
     import abc
     import logging
 
-    import gui
+    from . import gui
 
     from pygame_cards import controller, card_holder, card_sprite
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
@@ -75,7 +75,7 @@ class JsonHelper:
         if json_dict is not None:
             # Validate "window"
             if "window" in json_dict and isinstance(json_dict["window"], dict):
-                JsonHelper.check_field("title", json_dict["window"], basestring, "My Game test")
+                JsonHelper.check_field("title", json_dict["window"], str, "My Game test")
                 JsonHelper.check_field("size", json_dict["window"], list, [570, 460])
                 JsonHelper.check_field("background_color", json_dict["window"], list, [0, 153, 0])
             else:
@@ -90,9 +90,9 @@ class JsonHelper:
             # Validate "card"
             if "card" in json_dict and isinstance(json_dict["card"], dict):
                 JsonHelper.check_field("size", json_dict["card"], list, [65, 85])
-                JsonHelper.check_field("front_sprite_path", json_dict["card"], basestring,
+                JsonHelper.check_field("front_sprite_path", json_dict["card"], str,
                                        "img/cards/")
-                JsonHelper.check_field("back_sprite_file", json_dict["card"], basestring,
+                JsonHelper.check_field("back_sprite_file", json_dict["card"], str,
                                        "img/back-side.png")
                 JsonHelper.check_field("move_speed", json_dict["card"], int, 80)
             else:
@@ -123,9 +123,8 @@ class JsonHelper:
         logging.warning(message)
 
 
-class GameApp(object):
+class GameApp(object, metaclass=abc.ABCMeta):
     """ GameApp class controls the application flow and settings. """
-    __metaclass__ = abc.ABCMeta
 
     class GuiInterface(object):
         """ Inner class with GUI interface functions """
