@@ -5,9 +5,9 @@ try:
     import pygame
 
     from pygame_cards import game_app, controller, deck, card_holder, enums
-    import holders
+    from . import holders
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
