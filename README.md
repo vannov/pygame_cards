@@ -12,7 +12,7 @@ Check out the _examples_ folder - it contains implementation of classic "Klondik
 
 ####Prerequisites:
 
-Python version 2.7.x: https://www.python.org/downloads/
+Python version 3.8.x: https://www.python.org/downloads/
 
 Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
