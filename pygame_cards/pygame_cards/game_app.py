@@ -191,10 +191,11 @@ class GameApp(object, metaclass=abc.ABCMeta):
             """ Destroys all elements in the gui_list. """
             self.gui_list = []
 
-    def __init__(self, json_path, game_controller=None):
+    def __init__(self, json_path, controller_cls=None, **kwargs):
         """
         :param json_path: path to configuration json file
-        :param game_controller: object of Controller class
+        :param controller_cls: Controller class
+        :param kwargs: passed to __init__ of controller_cls
         """
         # Windows properties that will be set in load_settings_from_json()
         self.title = None
@@ -215,11 +216,15 @@ class GameApp(object, metaclass=abc.ABCMeta):
         self.stopped = False
         self.mouse_timestamp = None  # Used for double click calculation
         self.gui_interface = GameApp.GuiInterface(self.screen)
-        if isinstance(game_controller, controller.Controller):
-            self.game_controller = game_controller
-            self.game_controller.gui_interface = self.gui_interface
-            self.game_controller.settings_json = self.settings_json
-            self.game_controller.build_objects()
+        if controller_cls is not None:
+            controller_kwargs = {
+                'gui_interface': self.gui_interface,
+                'settings_json': self.settings_json,
+            }
+            controller_kwargs.update(kwargs)
+            self.game_controller = controller_cls(**controller_kwargs)
+        else:
+            self.game_controller = None
 
     def is_double_click(self):
         if self.mouse_timestamp is None:
