@@ -5,13 +5,11 @@ try:
     import pygame
     from threading import Timer
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
-class AbstractGUI:
-    __metaclass__ = abc.ABCMeta
-
+class AbstractGUI(metaclass=abc.ABCMeta):
     def __init__(self, screen, text="", text_size=15, color=(0, 0, 0), id_=""):
         self.screen = screen
         self.text = text

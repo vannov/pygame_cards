@@ -3,7 +3,7 @@ try:
     import sys
     #from enum import IntEnum
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
@@ -55,12 +55,12 @@ def get_suit_string_from_enum(suit):
     Empty string if passed suit is not a valid Suit enum
     """
     if suit == Suit.hearts:
-        return u'\u2665'
+        return '\u2665'
     elif suit == Suit.diamonds:
-        return u'\u2666'
+        return '\u2666'
     elif suit == Suit.clubs:
-        return u'\u2663'
+        return '\u2663'
     elif suit == Suit.spades:
-        return u'\u2660'
+        return '\u2660'
     else:
         return ''

@@ -5,15 +5,14 @@ try:
 
     from pygame_cards import enums
 except ImportError as err:
-    print "Fail loading a module in file:", __file__, "\n", err
+    print("Fail loading a module in file:", __file__, "\n", err)
     sys.exit(2)
 
 
-class GameObject(object):
+class GameObject(object, metaclass=abc.ABCMeta):
     """ Game object interface, implements Composite design pattern.
         An instance can be a single object (e.g. card) or a structure of objects (e.g. deck).
     """
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, children=[], grab_policy=enums.GrabPolicy.no_grab):
         """
