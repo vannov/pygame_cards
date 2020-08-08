@@ -37,18 +37,27 @@ class CardsHolder(game_object.GameObject):
         self.grabbed_card = None
 
     def is_clicked(self, pos):
+        """ Checks if any part of the holder is clicked, even if it has no cards.
+        :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
+        :return: True if holder is clicked, False otherwise
+        """
+        if len(self.cards) is not 0:
+            # Check if any card clicked.
+            return any(card_.is_clicked(pos) for card_ in self.cards)
+        else:
+            # No cards, but check if the holder's empty area clicked.
+            return \
+                pos[0] > self.pos[0]\
+                and pos[0] < (self.pos[0] + CardsHolder.card_json["size"][0])\
+                and pos[1] > self.pos[1]\
+                and pos[1] < (self.pos[1] + CardsHolder.card_json["size"][1])
+
+    def is_top_card_clicked(self, pos):
         """ Checks if a top card is clicked.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
         :return: True if top card is clicked, False otherwise
         """
-        if len(self.cards) is not 0:
-            if self.cards[-1].is_clicked(pos):
-                return True
-        elif pos[0] > self.pos[0] and pos[0] < (self.pos[0] + CardsHolder.card_json["size"][0]) and\
-             pos[1] > self.pos[1] and pos[1] < (self.pos[1] + CardsHolder.card_json["size"][1]):
-            return True
-        else:
-            return False
+        return len(self.cards) is not 0 and self.cards[-1].is_clicked(pos)
 
     def check_click(self, pos):
         """ Checks if a top card is clicked.

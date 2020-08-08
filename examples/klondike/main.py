@@ -195,7 +195,7 @@ class KlondikeController(controller.Controller):
     def process_double_click(self, pos):
         search_list = self.piles + [self.stack]
         for holder in search_list:
-            if len(holder.cards) != 0 and holder.is_clicked(pos):
+            if holder.is_top_card_clicked(pos):
                 card_ = holder.cards[-1]
                 for found in self.foundations:
                     if found.can_drop_card(card_):
