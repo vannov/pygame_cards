@@ -81,6 +81,8 @@ class CardsHolder(game_object.GameObject):
                         break
 
                 if index != -1:
+                    if index == 0 and self.last_card_callback is not None:
+                        self.last_card_callback(self.cards[0])
                     grabbed_cards = [c for c in self.cards if self.cards.index(c) >= index]
                     grabbed_cards.reverse()
                     self.cards[:] = [c for c in self.cards if self.cards.index(c) < index]
