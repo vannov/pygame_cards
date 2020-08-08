@@ -181,6 +181,7 @@ class CardsHolder(game_object.GameObject):
             Suits order: hearts, diamonds, clubs, spades.
         """
         self.cards.sort(key=key_func)
+        self.update_position(self.offset)
 
     def move_all_cards(self, other, back_side_up=True):
         """ Moves all cards to other cards holder.
