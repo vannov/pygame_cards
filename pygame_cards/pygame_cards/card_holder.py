@@ -174,11 +174,13 @@ class CardsHolder(game_object.GameObject):
         for card_ in self.cards:
             card_.flip()
 
-    def sort_cards(self):
-        """ Sort cards by suits and ranks from lower to higher.
-        Suits order: hearts, diamonds, clubs, spades.
+    def sort_cards(self, key_func=operator.attrgetter('suit', 'rank')):
+        """ Sort cards by the given key function.
+        :param key_func: Key function for sorting cards. By default,
+            suits and ranks from lower to higher.
+            Suits order: hearts, diamonds, clubs, spades.
         """
-        self.cards.sort(key=operator.attrgetter('suit', 'rank'))
+        self.cards.sort(key=key_func)
 
     def move_all_cards(self, other, back_side_up=True):
         """ Moves all cards to other cards holder.
