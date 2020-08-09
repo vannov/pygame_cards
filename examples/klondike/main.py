@@ -84,7 +84,8 @@ class KlondikeController(controller.Controller):
                               foundation_pos[1] + foundation_offset[1])
             self.add_rendered_object(self.foundations[i])
 
-        self.grabbed_cards_holder = holders.GrabbedCardsHolder((0, 0), pile_inner_offset)
+        self.grabbed_cards_holder = card_holder.GrabbedCardsHolder((0, 0),\
+                                        pile_inner_offset)
         self.add_rendered_object(self.grabbed_cards_holder)
         self.owner_of_grabbed_card = None
 
@@ -140,8 +141,9 @@ class KlondikeController(controller.Controller):
 
         if len(self.grabbed_cards_holder.cards) == 0:
             for obj in self.rendered_objects:
-                grabbed_cards = obj.try_grab_card(pos)
+                (grabbed_cards, mouse_offset) = obj.try_grab_card_at(pos)
                 if grabbed_cards is not None:
+                    self.grabbed_cards_holder.mouse_offset = mouse_offset
                     for card_ in grabbed_cards:
                         self.grabbed_cards_holder.add_card(card_)
                     self.owner_of_grabbed_card = obj

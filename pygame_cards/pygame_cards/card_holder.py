@@ -2,6 +2,7 @@
 try:
     import sys
     import operator
+    import pygame
 
     from pygame_cards import game_object, card, enums
 except ImportError as err:
@@ -34,7 +35,6 @@ class CardsHolder(game_object.GameObject):
         self.last_card_callback = last_card_callback
         self.pos = pos
         self.offset = offset
-        self.grabbed_card = None
 
     def is_clicked(self, pos):
         """ Checks if any part of the holder is clicked, even if it has no cards.
@@ -59,62 +59,65 @@ class CardsHolder(game_object.GameObject):
         """
         return len(self.cards) is not 0 and self.cards[-1].is_clicked(pos)
 
-    def check_click(self, pos):
-        """ Checks if a top card is clicked.
+    def try_grab_card_at(self, pos):
+        """ Tries to grab a card (or multiple cards) at given screen position.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
-        :return: True if top card is clicked, False otherwise
+        :return: Tuple of:
+                 - List with Card object if grabbed or None if card can't be grabbed or mouse click
+                   is not on the holder.
+                 - Offset between given pos and pos of grabbed card.
         """
-        if len(self.cards) is not 0:
-            if self.cards[-1].check_mouse(pos, True):
-                return True
-        return False
+        (card_, grab_offset) = self.card_at(pos)
+        return (self.try_grab_card(card_), grab_offset)
 
-    def try_grab_card(self, pos):
-        """ Tries to grab a card (or multiple cards) with a mouse click.
-        :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
-        :return: List with Card object if grabbed or None if card can't be grabbed or mouse click
-                 is not on the holder.
+    def try_grab_card(self, card_):
+        """ Tries to grab a card (or multiple cards).
+        :param card_: Given card at which to grab.
+        :return: List with Card object if grabbed or None if card can't be grabbed.
         """
         grabbed_cards = None
-        if len(self.cards) > 0:
-            if self.grab_policy == enums.GrabPolicy.can_single_grab:
-                if self.check_click(pos):
-                    grabbed_cards = [self.pop_top_card()]
-            elif self.grab_policy == enums.GrabPolicy.can_multi_grab:
-                index = -1
-                for card_ in reversed(self.cards):
-                    if card_.back_up:
-                        break
-                    if card_.check_mouse(pos, True):
-                        index = self.cards.index(card_)
-                        break
 
-                if index != -1:
-                    if index == 0 and self.last_card_callback is not None:
-                        self.last_card_callback(self.cards[0])
-                    grabbed_cards = [c for c in self.cards if self.cards.index(c) >= index]
-                    grabbed_cards.reverse()
-                    self.cards[:] = [c for c in self.cards if self.cards.index(c) < index]
+        if card_ is not None and self.can_grab_card(card_):
+            index = self.cards.index(card_)
+
+            if self.grab_policy == enums.GrabPolicy.can_multi_grab:
+                if index == 0 and self.last_card_callback is not None:
+                    self.last_card_callback(self.cards[0])
+                grabbed_cards = [c for c in self.cards if self.cards.index(c) >= index]
+                self.cards[:] = [c for c in self.cards if self.cards.index(c) < index]
+            else:
+                grabbed_cards = [self.pop_card(index)]
+
         return grabbed_cards
 
-    def check_grab(self, pos, bot=False):
-        """ Tries to grab a card in specified position.
-        Returns True if card was grabbed or there is already grabbed card that is not dropped yet.
-        Otherwise returns False.
-        :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
-        :param bot: if current player is a 'bot', i.e. virtual adversary (default False)
-        :return: True if there is a card grabbed, False otherwise
+    def can_grab_card(self, card_):
+        """Determine if a given card from the holder can be grabbed
+        out of the holder.
+        :param card_: Card that is expected to be in the current holder.
         """
-        if not self.grabbed_card and len(self.cards) > 0:
-            if bot or self.cards[-1].check_mouse(pos, True):
-                if self.cards[-1].back_up:
-                    self.cards[-1].flip()
-                self.grabbed_card = True
-                return True
-            else:
-                return False
+        if self.grab_policy == enums.GrabPolicy.no_grab:
+            return False
+        elif len(self.cards) == 0:
+            return False
+        elif self.grab_policy == enums.GrabPolicy.can_single_grab:
+            return card_ is self.cards[-1]
         else:
-            return True
+            return card_ in self.cards
+
+    def card_at(self, pos):
+        """See which card is at a given position.
+        :param pos: tuple with coordinates (x, y) - position on screen.
+        :return: tuple of card being touched (or None),
+            mouse offset of card position from given position (or None)
+        """
+        for card_ in reversed(self.cards):
+            if card_.is_clicked(pos):
+                card_pos = card_.get_pos()
+                return (\
+                    card_,\
+                    (pos[0] - card_pos[0], pos[1] - card_pos[1]))
+
+        return (None, None)
 
     def add_card(self, card_, on_top=True):
         """ Appends a card to the list of self.cards
@@ -122,7 +125,6 @@ class CardsHolder(game_object.GameObject):
         :param on_top: bolean, True if the card should be put on top, False in the bottom
         """
         if isinstance(card_, card.Card):
-            card_.unclick()
             if on_top:
                 pos_ = self.pos
                 if len(self.cards) is not 0:
@@ -135,9 +137,9 @@ class CardsHolder(game_object.GameObject):
                 self.cards.insert(0, card_)
                 self.update_position(self.offset)
 
-    def pop_card(self, top):
+    def pop_card(self, index):
         """ Removes top or bottom cards from the list and returns it.
-        :param top: boolean, if True top card is removed, otherwise bottom card is removed.
+        :param index: Index of card to remove.
         :return: Card object
         """
         if len(self.cards) == 0:
@@ -145,29 +147,24 @@ class CardsHolder(game_object.GameObject):
         else:
             if len(self.cards) == 1 and self.last_card_callback is not None:
                 self.last_card_callback(self.cards[0])
-            if top:
-                return self.cards.pop()
-            else:
-                return self.cards.pop(0)
+
+            popped_card = self.cards.pop(index)
+            self.update_position(self.offset)
+            return popped_card
 
     def pop_top_card(self):
         """ Removes top card from the list and returns it.
         If there are no cards left, returns None.
         :return: Card object
         """
-        return self.pop_card(top=True)
+        return self.pop_card(-1)
 
     def pop_bottom_card(self):
         """ Removes last card from the list and returns it.
         If there are no cards left, returns None.
         :return: Card object
         """
-        return self.pop_card(top=False)
-
-    def drop_card(self):
-        """ Drops grabbed card."""
-        self.grabbed_card = False
-        return self.pop_top_card()
+        return self.pop_card(0)
 
     def flip_cards(self):
         """ Flip cards from face-up to face-down and vice versa """
@@ -211,7 +208,13 @@ class CardsHolder(game_object.GameObject):
         :return: True if card collides with holder, False otherwise
         """
         if len(self.cards) > 0:
-            return self.cards[-1].check_collide(card_=card_)
+            if self.grab_policy == enums.GrabPolicy.can_single_grab:
+                # If can only grab top card, then only check for collision
+                # with top card.
+                return self.cards[-1].check_collide(card_=card_)
+            else:
+                # Any other grab policy, check all cards for collision.
+                return any(c.check_collide(card_=card_) for c in reversed(self.cards))
         else:
             return card_.check_collide(pos=self.pos)
 
@@ -222,3 +225,37 @@ class CardsHolder(game_object.GameObject):
         :param screen: Screen to render objects on
         """
         pass
+
+
+class GrabbedCardsHolder(CardsHolder):
+    """Specialized card holder, where the position always follows the mouse.
+    """
+    def __init__(self, mouse_offset=(0, 0), offset=(0, 0),
+                 grab_policy=enums.GrabPolicy.no_grab,
+                 last_card_callback=None):
+        """
+        :param offset: tuple (x, y) with values of offset between cards in the holder
+        :param grab_policy: value from enums.GrabPolicy (by default enums.GrabPolicy.no_grab)
+        :param last_card_callback: function to be called once the last card removed (default None)
+        """
+        self.mouse_offset = mouse_offset
+        CardsHolder.__init__(self, self.get_target_pos(), offset, grab_policy,\
+            last_card_callback)
+
+
+    def render_all(self, screen):
+        # Track the mouse position.
+        self.pos = self.get_target_pos()
+        self.update_position(self.offset)
+
+        super().render_all(screen)
+
+
+    def get_target_pos(self):
+        """Get the current desired position of this holder, whose purpose
+        is to track the position of the mouse.
+        """
+        mouse_pos = pygame.mouse.get_pos()
+        return (\
+            mouse_pos[0] - self.mouse_offset[0],\
+            mouse_pos[1] - self.mouse_offset[1])

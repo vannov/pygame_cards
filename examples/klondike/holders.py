@@ -40,6 +40,13 @@ class Foundation(card_holder.CardsHolder):
 
 
 class Pile(card_holder.CardsHolder):
+    def can_grab_card(self, card_):
+        """Determine if a given card from the holder can be grabbed
+        out of the holder.
+        :param card_: Card that is expected to be in the current holder.
+        """
+        return not card_.back_up and super().can_grab_card(card_)
+
     def can_drop_card(self, card_):
         """ Check if a card can be dropped into a pile. Conditions:
         - If a pile is empty, only a King can be dropped
@@ -66,22 +73,6 @@ class Pile(card_holder.CardsHolder):
 
     def render(self, screen):
         draw_empty_card_pocket(self, screen)
-
-
-class GrabbedCardsHolder(card_holder.CardsHolder):
-    """Holds cards currently grabbed by the user (ie under the mouse with the button held down)"""
-    def add_card(self, card_, on_top=False):
-        if isinstance(card_, card.Card):
-            if on_top:
-                self.cards.append(card_)
-            else:
-                self.cards.insert(0, card_)
-
-    def render(self, screen):
-        if len(self.cards) > 0:
-            self.pos = self.cards[0].get_sprite().pos
-            self.update_position(self.offset)
-            _ = screen
 
 
 class DeckDiscard(card_holder.CardsHolder):

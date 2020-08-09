@@ -35,7 +35,6 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def __init__(self, pos):
         self.rect = [pos[0], pos[1], 0, 0]
         self.mouse_offset = [0, 0]
-        self.clicked = False
         self.image = None  # Placeholder for card sprite
 
     @property
@@ -54,13 +53,7 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def get_rect(self):
         return self.image.get_rect()
 
-    def update(self):
-        if self.clicked:
-            self.rect[0] = pygame.mouse.get_pos()[0] - self.mouse_offset[0]
-            self.rect[1] = pygame.mouse.get_pos()[1] - self.mouse_offset[1]
-
     def render(self, screen):
-        self.update()
         screen.blit(*self.get_render_tuple())
 
     def get_render_tuple(self):
@@ -69,16 +62,6 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def is_clicked(self, pos):
         return (pos[0] > self.rect[0] and pos[0] < (self.rect[0] + self.get_rect()[2]) and
                 pos[1] > self.rect[1] and pos[1] < (self.rect[1] + self.get_rect()[3]))
-
-    def check_mouse(self, pos, down):
-        if self.is_clicked(pos):
-            if isinstance(down, bool):
-                self.clicked = down
-            self.mouse_offset[0] = pos[0] - self.rect[0]
-            self.mouse_offset[1] = pos[1] - self.rect[1]
-            return True
-        else:
-            return False
 
     def check_card_collide(self, sprite):
         rect = pygame.Rect(self.rect)
