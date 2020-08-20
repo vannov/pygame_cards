@@ -4,13 +4,13 @@
 
 The package contains a set of modules that encapsulate Pygame routines and provide a simple API to create a card game with minimum amount of code.
 
-Check out the _examples_ folder - it contains implementation of classic "Klondike" solitaire. Here how the game looks like:
+Check out the _examples_ folder - it contains an implementation of classic "Klondike" solitaire. Here's what the game looks like:
 
 <img src="https://github.com/vannov/pygame_cards/blob/master/examples/klondike/klondike.png" width="570" height="470"/>
 
 ## Installation 
 
-####Prerequisites:
+#### Prerequisites:
 
 Python version 3.8.x: https://www.python.org/downloads/
 
@@ -18,7 +18,7 @@ Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
 There is a known Pygame issue with OS X El Capitan and newer. Because of different versions of SDL_image library, images rendered in a Pygame application look corrupted. The workaround is to downgrade to an older version of SDL_image library. See instructions here: http://stackoverflow.com/a/35385411
 
-####Installation from redistributable:
+#### Installation from redistributable:
 
 Download archive with latest available version of **pygame_cards** package from https://github.com/vannov/pygame_cards/releases. Install the package:
 
@@ -32,7 +32,7 @@ sudo pip install pygame_cards-0.1.tar.gz
 pip install pygame_cards-0.1.zip
 ```
 
-####Installation from sources:
+#### Installation from sources:
 To install the **pygame_cards** framework, download this repository, in terminal cd into _pygame_cards_ folder and run command:
 
 ```
@@ -109,7 +109,7 @@ GameApp class controls the application flow and settings. An object of GameApp c
 
 GameApp constructor takes 2 arguments:
 - **json_path**: path to JSON settings file
-- **game_controller**: object of class derived from Controller 
+- **controller_cls**: class derived from Controller 
 
 After a GameApp object is created, to start the game simply call execute() method.
 
@@ -117,7 +117,7 @@ Example of the main() method, assuming that there is definition of MyGameControl
 
 ```python
 def main():
-    solitaire_app = game_app.GameApp(json_path='settings.json', game_controller=MyGameController())
+    solitaire_app = game_app.GameApp(json_path='settings.json', controller_cls=MyGameController)
     solitaire_app.execute()
 ```
 
