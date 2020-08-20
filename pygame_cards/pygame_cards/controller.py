@@ -34,7 +34,6 @@ class Controller(object, metaclass=abc.ABCMeta):
         :param gui_interface: gui interface object
         """
         self.rendered_objects = []
-        self.moves = []
         self.animations = []
         if objects_list is not None and isinstance(objects_list, list):
             self.rendered_objects = objects_list
@@ -95,11 +94,6 @@ class Controller(object, metaclass=abc.ABCMeta):
             for obj in self.rendered_objects:
                 if isinstance(obj, game_object.GameObject):
                     obj.render_all(screen)
-
-        if len(self.moves) > 0:
-            self.moves[0].update()
-            if self.moves[0].is_completed():
-                self.moves.pop(0)
         
         # Advance all animations.
         for animation in self.animations:
@@ -124,25 +118,6 @@ class Controller(object, metaclass=abc.ABCMeta):
         :param obj: Rendered object to remove.
         """
         self.rendered_objects.remove(obj)
-
-    def add_move(self, cards, destination_pos, speed=None):
-        """
-        Creates cards animation object and stores in into list of moves in the Controller.
-        Controller class deletes the animation automatically after it completes.
-        :param cards: list of cards to be moved.
-        :param destination_pos: tuple with coordinates (x,y) of destination position where cards
-                                should be moved.
-        :param speed: integer number, on how many pixels card(s) should move per frame.
-        """
-        if isinstance(cards, list):
-            sprites = []
-            for card_ in cards:
-                if isinstance(card_, card.Card):
-                    sprites.append(card_.sprite)
-            if len(sprites) != 0:
-                self.moves.append(card_sprite.SpriteMove(sprites, destination_pos, speed))
-        elif isinstance(cards, card.Card):
-            self.moves.append(card_sprite.SpriteMove(cards.sprite, destination_pos, speed))
 
     def add_animation(self, animation):
         """Adds an animation to the list of active animations in the controller.
