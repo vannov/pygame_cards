@@ -4,7 +4,7 @@ try:
     import os
     import pygame
 
-    from pygame_cards import game_app, controller, deck, card_holder, enums
+    from pygame_cards import game_app, controller, deck, card_holder, enums, animation
     import holders
 except ImportError as err:
     print("Fail loading a module in file:", __file__, "\n", err)
@@ -151,26 +151,48 @@ class KlondikeController(controller.Controller):
 
     def process_mouse_up(self, pos):
         if len(self.grabbed_cards_holder.cards) > 0:
+            # Start by assuming cards will float back to original holder.
+            target_holder = self.owner_of_grabbed_card
+            dropped_cards = False
+            
+            # First, check to see if held cards are being dropped on a valid
+            # destination.
             for obj in self.rendered_objects:
-                dropped_cards = False
                 if hasattr(obj, "can_drop_card") and hasattr(obj, "check_collide"):
                     if (obj.check_collide(self.grabbed_cards_holder.cards[0]) and
                             obj.can_drop_card(self.grabbed_cards_holder.cards[0])):
                         dropped_cards = True
-                        while len(self.grabbed_cards_holder.cards) != 0:
-                            obj.add_card(self.grabbed_cards_holder.pop_bottom_card())
+                        target_holder = obj
                         break
-            if self.owner_of_grabbed_card is not None:
-                while len(self.grabbed_cards_holder.cards) != 0:
-                    self.owner_of_grabbed_card.add_card(
-                        self.grabbed_cards_holder.pop_bottom_card())
-                if dropped_cards:
-                    if isinstance(self.owner_of_grabbed_card, holders.Pile):
-                        self.owner_of_grabbed_card.open_top_card()
-                    elif isinstance(self.owner_of_grabbed_card, holders.Foundation):
-                        self.check_win()
-                self.owner_of_grabbed_card = None
-                _ = pos
+
+            if target_holder is not None:
+                # Identified a destination for grabbed cards to float to.
+                self_ = self
+                def drop_cards(holder_):
+                    while len(holder_.cards) != 0:
+                        target_holder.add_card(holder_.pop_bottom_card())
+                    if isinstance(target_holder, holders.Foundation):
+                        self_.check_win()
+
+                    if self.owner_of_grabbed_card is not None:
+                        if dropped_cards:
+                            if isinstance(self_.owner_of_grabbed_card, holders.Pile):
+                                self_.owner_of_grabbed_card.open_top_card()
+                        self_.owner_of_grabbed_card = None
+                        _ = pos
+
+                # Check if cards far enough away to animate.
+                drop_distance = animation.distance(\
+                    self.grabbed_cards_holder.pos,\
+                    target_holder.next_card_pos)
+                if drop_distance > 15:
+                    cards = self.grabbed_cards_holder.pop_all_cards()
+                    self.animate_cards(cards, target_holder.next_card_pos,\
+                        on_complete=drop_cards)
+                else:
+                    # Drop distance short. Do not animate. It might mess
+                    # with double click event handler.
+                    drop_cards(self.grabbed_cards_holder)
 
     def process_deck_click(self):
         while len(self.stack.cards) != 0:
@@ -202,11 +224,16 @@ class KlondikeController(controller.Controller):
                 for found in self.foundations:
                     if found.can_drop_card(card_):
                         card_ = holder.pop_top_card()
-                        self.add_move([card_], found.pos)  # animate card move to foundation
-                        found.add_card(card_)
-                        self.check_win()
-                        if isinstance(holder, holders.Pile):
-                            holder.open_top_card()
+                        self_ = self
+
+                        def on_float_complete(float_holder):
+                            found.add_card(float_holder.pop_top_card())
+                            self_.check_win()
+                            if isinstance(holder, holders.Pile):
+                                holder.open_top_card()
+
+                        self.animate_cards([card_], found.next_card_pos,\
+                            on_complete=on_float_complete)
                         break
                 break
 

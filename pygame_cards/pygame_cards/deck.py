@@ -35,4 +35,4 @@ class Deck(card_holder.CardsHolder):
     def shuffle(self):
         """ Shuffles cards in the deck randomly """
         shuffle(self.cards)
-        self.update_position(self.offset)
+        self.update_position()

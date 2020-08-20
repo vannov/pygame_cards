@@ -8,7 +8,7 @@
 		"size": [65, 85],
 		"front_sprite_path": "img/cards/",
 		"back_sprite_file": "img/back-side.png",
-		"move_speed": 80
+		"move_speed": 1500
 	},
 	"deck": {
 		"position": [10, 10],

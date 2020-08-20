@@ -36,6 +36,26 @@ class CardsHolder(game_object.GameObject):
         self.pos = pos
         self.offset = offset
 
+    @property
+    def top_card_pos(self):
+        """Position tuple of top card,
+        or if no cards, position of holder.
+        """
+        if len(self.cards) > 0:
+            return self.cards[-1].get_pos()
+        else:
+            return self.pos
+
+    @property
+    def next_card_pos(self):
+        """Position of next card to be added, if it were added.
+        """
+        curr_pos = self.top_card_pos
+        if len(self.cards) == 0:
+            return curr_pos
+        else:
+            return (curr_pos[0] + self.offset[0], curr_pos[1] + self.offset[1])
+
     def is_clicked(self, pos):
         """ Checks if any part of the holder is clicked, even if it has no cards.
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
@@ -135,7 +155,7 @@ class CardsHolder(game_object.GameObject):
                 self.cards.append(card_)
             else:
                 self.cards.insert(0, card_)
-                self.update_position(self.offset)
+                self.update_position()
 
     def pop_card(self, index):
         """ Removes top or bottom cards from the list and returns it.
@@ -149,7 +169,7 @@ class CardsHolder(game_object.GameObject):
                 self.last_card_callback(self.cards[0])
 
             popped_card = self.cards.pop(index)
-            self.update_position(self.offset)
+            self.update_position()
             return popped_card
 
     def pop_top_card(self):
@@ -166,6 +186,15 @@ class CardsHolder(game_object.GameObject):
         """
         return self.pop_card(0)
 
+    def pop_all_cards(self):
+        """ Pop all cards out of the holder.
+        :return: List(Card)
+        """
+        popped_cards = []
+        while len(self.cards) > 0:
+            popped_cards.append(self.pop_bottom_card())
+        return popped_cards
+
     def flip_cards(self):
         """ Flip cards from face-up to face-down and vice versa """
         for card_ in self.cards:
@@ -178,7 +207,7 @@ class CardsHolder(game_object.GameObject):
             Suits order: hearts, diamonds, clubs, spades.
         """
         self.cards.sort(key=key_func)
-        self.update_position(self.offset)
+        self.update_position()
 
     def move_all_cards(self, other, back_side_up=True):
         """ Moves all cards to other cards holder.
@@ -193,14 +222,14 @@ class CardsHolder(game_object.GameObject):
                         card_.flip()
                     other.add_card(card_)
 
-    def update_position(self, offset):
+    def update_position(self):
         """ Updates position of all cards according to the offset passed
-        :param offset: tuple (x, y) with values of offset for each card
         """
         pos_ = self.pos
+        offset_ = self.offset
         for card_ in self.cards:
             card_.set_pos(pos_)
-            pos_ = pos_[0] + offset[0], pos_[1] + offset[1]
+            pos_ = pos_[0] + offset_[0], pos_[1] + offset_[1]
 
     def check_collide(self, card_):
         """ Checks if current cards holder collides with other card.
@@ -242,14 +271,12 @@ class GrabbedCardsHolder(CardsHolder):
         CardsHolder.__init__(self, self.get_target_pos(), offset, grab_policy,\
             last_card_callback)
 
-
     def render_all(self, screen):
         # Track the mouse position.
         self.pos = self.get_target_pos()
-        self.update_position(self.offset)
+        self.update_position()
 
         super().render_all(screen)
-
 
     def get_target_pos(self):
         """Get the current desired position of this holder, whose purpose
@@ -259,3 +286,41 @@ class GrabbedCardsHolder(CardsHolder):
         return (\
             mouse_pos[0] - self.mouse_offset[0],\
             mouse_pos[1] - self.mouse_offset[1])
+
+
+class StaticOffsetCardsHolder(CardsHolder):
+    """Specialized card holder, where each card keeps its position relative
+    to the other cards.
+    """
+    def __init__(self, pos=(0, 0), grab_policy=enums.GrabPolicy.no_grab,
+                last_card_callback=None):
+        """
+        :param grab_policy: value from enums.GrabPolicy (by default enums.GrabPolicy.no_grab)
+        :param last_card_callback: function to be called once the last card removed (default None)
+        """
+        CardsHolder.__init__(self, pos=pos, grab_policy=grab_policy,\
+                            last_card_callback=last_card_callback)
+        self.last_pos = pos # This will be updated when update_position called.
+
+    def add_card(self, card_, on_top=True):
+        """ Appends a card to the list of self.cards
+        :param card_:  object of the Card class to be appended to the list
+        :param on_top: bolean, True if the card should be put on top, False in the bottom
+        """
+        if isinstance(card_, card.Card):
+            if on_top:
+                self.cards.append(card_)
+            else:
+                self.cards.insert(0, card_)
+
+    def update_position(self):
+        """ Updates position of all cards according to their relative
+        position to each other.
+        """
+        offset_ = (self.pos[0] - self.last_pos[0], self.pos[1] - self.last_pos[1])
+
+        for card_ in self.cards:
+            card_pos = card_.get_pos()
+            card_.set_pos((card_pos[0] + offset_[0], card_pos[1] + offset_[1]))
+        
+        self.last_pos = self.pos
