@@ -192,7 +192,7 @@ class CardsHolder(game_object.GameObject):
         """
         popped_cards = []
         while len(self.cards) > 0:
-            popped_cards.append(self.pop_bottom_card())
+            popped_cards.insert(0, self.pop_top_card())
         return popped_cards
 
     def flip_cards(self):
