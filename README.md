@@ -161,7 +161,7 @@ Example of creating a Mac OS X app with py2app:
  ```
  python setup.py py2app
  ```
-
+[![Run on Repl.it](https://repl.it/badge/github/vannov/pygame_cards)](https://repl.it/github/vannov/pygame_cards)
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
