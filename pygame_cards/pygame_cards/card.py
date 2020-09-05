@@ -16,8 +16,16 @@ class Card(game_object.GameObject):
         self.suit = suit
         self.rank = rank
         self.sprite = card_sprite.CardSprite(suit, rank, pos, back_up)
-        #self.back_sprite = card_sprite.CardBackSprite(pos)
-        self.back_up = back_up
+        self._back_up = back_up
+
+    @property
+    def back_up(self):
+        return self._back_up
+
+    @back_up.setter
+    def back_up(self, value):
+        self._back_up = value
+        self.sprite.back_up = self._back_up
 
     def get_sprite(self):
         """ Returns card's spite object
@@ -37,7 +45,6 @@ class Card(game_object.GameObject):
     def flip(self):
         """ Flips the card from face-up to face-down and vice versa """
         self.back_up = not self.back_up
-        self.sprite.flip()
 
     def is_clicked(self, pos):
         """ Checks if mouse click is on card

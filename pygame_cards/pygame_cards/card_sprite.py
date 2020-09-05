@@ -106,8 +106,13 @@ class CardSprite(AbstractPygameCardSprite):
         else:
             return self.image, (self.rect[0], self.rect[1])
 
-    def flip(self):
-        self.back_up = not self.back_up
+    @property
+    def back_up(self):
+        return self._back_up
+
+    @back_up.setter
+    def back_up(self, value):
+        self._back_up = value
 
     @staticmethod
     def get_image_path(suit, rank):
