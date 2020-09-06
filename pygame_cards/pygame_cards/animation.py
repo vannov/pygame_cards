@@ -30,6 +30,22 @@ def distance(point1, point2):
     return math.sqrt(math.pow(point1[0] - point2[0], 2) + math.pow(point1[1] - point2[1], 2))
 
 
+def get_pulse_plot(a, b, period):
+    """Calculates formula to plot a cosine wave with vertical extremes a and b,
+    with given x-period.
+    :param a: Start position of cosine wave at x=0
+    :param b: Opposite y extreme of cosine wave at x=period/2
+    :param period: x-period of cosine wave
+    :returns: Function to plot cosine wave given x
+    """
+    def pulse_plot(x):
+        amp = (a-b)/2
+        rad = (2*math.pi*x)/period
+        return (amp*math.cos(rad)) + amp + b
+
+    return pulse_plot
+
+
 class Plotter(object, metaclass=abc.ABCMeta):
     """Abstract interface class that defines a plotter: an object that
     plots the position of an animated object based on elapsed time.
@@ -160,7 +176,43 @@ class Animation(object, metaclass=abc.ABCMeta):
 
     Should be inherited by concrete animation classes.
 
-    Following methods are mandatory for all classes that derive from Animation:
+    Following members are mandatory for all classes that derive from Animation:
+        - update() - Update animation
+    """
+    def __init__(self, on_complete=None):
+        """Initializes object.
+        :param on_complete: Optional callback function to call when
+            animation completes.
+            Function takes no arguments and is not expected to return anything.
+        """
+        self.on_complete = on_complete
+        self.start_time = time.time()
+        self._is_completed = False
+
+    @property
+    def is_completed(self):
+        return self._is_completed
+
+    @is_completed.setter
+    def is_completed(self, value):
+        newly_complete = value and not self._is_completed
+        self._is_completed = value
+        if newly_complete and self.on_complete is not None:
+            self.on_complete()
+
+    @abc.abstractmethod
+    def update(self):
+        """Advance the animation forward."""
+        pass
+
+
+class PositionAnimation(Animation, metaclass=abc.ABCMeta):
+    """Abstract class that defines an animation
+    from one position to another.
+
+    Should be inherited by concrete animation classes.
+
+    Following methods are mandatory for all classes that derive from PositionAnimation:
         - update_pos(pos) - Update position of animated item (whatever it is)
     """
     def __init__(self, plotter, on_complete=None):
@@ -172,10 +224,8 @@ class Animation(object, metaclass=abc.ABCMeta):
             past its expected duration.
             Function takes no arguments and is not expected to return anything.
         """
+        Animation.__init__(self, on_complete)
         self.plotter = plotter
-        self.on_complete = on_complete
-        self.start_time = time.time()
-        self.is_completed = False
 
     def update(self):
         """Advance the animation forward (based on elapsed time.)
@@ -183,10 +233,9 @@ class Animation(object, metaclass=abc.ABCMeta):
         elapsed_ms = (time.time() - self.start_time) * 1000
 
         if not self.is_completed:
-            (curr_pos, self.is_completed) = self.plotter.plot(elapsed_ms)
+            (curr_pos, is_completed) = self.plotter.plot(elapsed_ms)
             self.update_pos(curr_pos)
-            if (self.is_completed and self.on_complete is not None):
-                self.on_complete()
+            self.is_completed = is_completed
 
     @abc.abstractmethod
     def update_pos(self, new_pos):
@@ -197,7 +246,7 @@ class Animation(object, metaclass=abc.ABCMeta):
         pass
 
 
-class CardsHolderAnimation(Animation):
+class CardsHolderAnimation(PositionAnimation):
     """Animates a card holder from one position to another.
     """
     def __init__(self, holder, plotter, on_complete=None):
@@ -210,7 +259,7 @@ class CardsHolderAnimation(Animation):
             past its expected duration.
             Function takes no arguments and is not expected to return anything.
         """
-        Animation.__init__(self, plotter, on_complete)
+        PositionAnimation.__init__(self, plotter, on_complete)
         self.holder = holder
     
     def update_pos(self, new_pos):
@@ -219,3 +268,34 @@ class CardsHolderAnimation(Animation):
         """
         self.holder.pos = new_pos
         self.holder.update_position()
+
+
+class ColorPulseAnimation(Animation):
+    """Pulses back and forth between two colors.
+    """
+    def __init__(self, color1, color2, period_ms, set_color, on_complete=None):
+        """Initialize new instance of ColorPulseAnimation.
+        :param color1: First color in the color pulse (start of vacillation.)
+        :param color2: Second color in the color pulse (end of vacillation.)
+        :param period_ms: Duration in milliseconds of full pulse from color1 to
+            color2 and back to color1.
+        :param set_color: Callback to set the color based on the animation's
+            current color. Receives one parameter: a color tuple. Returns nothing.
+        :param on_complete: Optional callback that occurs when animation completes.
+        """
+        Animation.__init__(self, on_complete)
+        self.color1 = color1
+        self.color2 = color2
+        self.period_ms = period_ms
+        self.set_color = set_color
+        self.r_plot = get_pulse_plot(color1[0], color2[0], period_ms)
+        self.g_plot = get_pulse_plot(color1[1], color2[1], period_ms)
+        self.b_plot = get_pulse_plot(color1[2], color2[2], period_ms)
+
+    def update(self):
+        """Advance the animation forward (based on elapsed time.)
+        """
+        if not self.is_completed:
+            elapsed_ms = (time.time() - self.start_time) * 1000
+            color = (self.r_plot(elapsed_ms), self.g_plot(elapsed_ms), self.b_plot(elapsed_ms))
+            self.set_color(color)

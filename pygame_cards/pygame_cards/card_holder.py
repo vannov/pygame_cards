@@ -20,7 +20,7 @@ class CardsHolder(game_object.GameObject):
                     for example: CardsHolder.card_json["size"][0]
     """
 
-    card_json = None
+    card_json = {}
 
     def __init__(self, pos=(0, 0), offset=(0, 0), grab_policy=enums.GrabPolicy.no_grab,
                  last_card_callback=None):
@@ -55,6 +55,10 @@ class CardsHolder(game_object.GameObject):
             return curr_pos
         else:
             return (curr_pos[0] + self.offset[0], curr_pos[1] + self.offset[1])
+
+    @property
+    def any_cards(self):
+        return len(self.cards) > 0
 
     def is_clicked(self, pos):
         """ Checks if any part of the holder is clicked, even if it has no cards.

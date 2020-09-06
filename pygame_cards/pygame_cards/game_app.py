@@ -168,7 +168,7 @@ class GameApp(object, metaclass=abc.ABCMeta):
             :param id_: string with unique ID of GUI element
             """
             for element in self.gui_list:
-                if hasattr(element, "id") and element.id_ == id_:
+                if hasattr(element, "id_") and element.id_ == id_:
                     self.gui_list.remove(element)
                     break
 
@@ -286,9 +286,21 @@ class GameApp(object, metaclass=abc.ABCMeta):
 
     def render(self):
         """ Renders game objects and gui elements """
-        pygame.draw.rect(self.screen, self.background_color, (0, 0, self.size[0], self.size[1]))
+        # Allow game controller to override background color.
+        background_color = self.background_color
+        if self.game_controller is not None:
+            if hasattr(self.game_controller, 'background_color'):
+                if self.game_controller.background_color is not None:
+                    background_color = self.game_controller.background_color
+
+        # Draw background
+        pygame.draw.rect(self.screen, background_color, (0, 0, self.size[0], self.size[1]))
+
+        # Render game controller elements.
         if self.game_controller is not None:
             self.game_controller.render_objects(self.screen)
+
+        # Render GUI elements.
         if self.gui_interface is not None:
             self.gui_interface.render()
 

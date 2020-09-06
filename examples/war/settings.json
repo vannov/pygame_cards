@@ -1,0 +1,49 @@
+{
+	"window": {
+		"size": [570, 460],
+		"title": "War",
+		"background_color": [25, 217, 255]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "img/cards/",
+		"back_sprite_file": "img/back-side.png",
+		"move_speed": 1000
+	},
+	"player_deck": {
+		"position": [245, 350],
+		"offset": [1, 0]
+	},
+	"ai_deck": {
+		"position": [245, 15],
+		"offset": [1, 0]
+	},
+	"player_stage": {
+		"position": [245, 242],
+		"offset": [10, 0]
+	},
+	"ai_stage": {
+		"position": [245, 122],
+		"offset": [10, 0]
+	},
+	"game_behavior": {
+		"evaluate_delay_ms": 1000
+	},
+	"ai_behavior": {
+		"min_delay_ms": 700,
+		"max_delay_ms": 1900
+	},
+	"gui": {
+		"restart_button": [10, 10, 50, 25],
+		"message": {
+			"pos": [30, 200],
+			"text_size": 32,
+			"text_color": [0,0,0]
+		},
+		"war_background": {
+			"color1": [222,13,13],
+			"color2": [214,147,30],
+			"period_ms": 2000
+		}
+	}
+}

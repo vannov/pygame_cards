@@ -40,6 +40,8 @@ class Controller(object, metaclass=abc.ABCMeta):
         self.gui_interface = gui_interface
         self.settings_json = settings_json
         self.started = False
+        # Make this a color tuple to override game app's background_color.
+        self.background_color = None
 
     @abc.abstractmethod
     def start_game(self):

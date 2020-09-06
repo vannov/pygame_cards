@@ -81,7 +81,7 @@ class Label(AbstractGUI):
 
     def render(self):
         if self.text != "":
-            text_surface = self.font.render(self.text, True, Button.text_color)
+            text_surface = self.font.render(self.text, True, self.color)
             self.screen.blit(text_surface, self.pos)
 
     def check_mouse(self, pos, down):
