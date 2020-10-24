@@ -1,6 +1,6 @@
 {
 	"window": {
-		"size": [770, 460],
+		"size": [770, 480],
 		"title": "Crazy Eights",
 		"background_color": [25, 217, 255]
 	},
@@ -23,14 +23,33 @@
 		"offset": [15, 0]
 	},
 	"opponent_hand": {
-		"position_y": 25,
+		"name": {
+			"position_y": 8,
+			"text_size": 18,
+			"text_color": [0,0,255]
+		},
+		"position_y": 32,
 		"x_range": [25, 744],
 		"offset": [2, 1]
 	},
+	"opponent_behavior": {
+		"min_delay_ms": 1100,
+		"max_delay_ms": 2500
+	},
 	"gui": {
 		"restart_button": [28, 416, 50, 25],
+		"message": {
+			"position": [458, 150],
+			"text_size": 18,
+			"text_color": [0, 0, 0]
+		},
+		"player_prompt": {
+			"position": [210, 454],
+			"text_size": 18,
+			"text_color": [255,0,0]
+		},
 		"dialog": {
-			"message": {
+			"title": {
 				"position": [463, 187],
 				"text_size": 18,
 				"text_color": [0, 0, 0]
