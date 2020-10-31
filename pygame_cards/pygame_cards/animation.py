@@ -46,6 +46,35 @@ def get_pulse_plot(a, b, period):
     return pulse_plot
 
 
+def linear_slope(start_pos, end_pos):
+    """Linear slope of line.
+    :param start_pos Tuple[int,int]:
+    :param end_Pos Tuple[int,int]:
+    :returns number or nan: nan if vertical slope
+    """
+    try:
+        return \
+            (end_pos[1] - start_pos[1]) \
+            / (end_pos[0] - start_pos[0])
+    except ZeroDivisionError:
+        return math.nan
+
+
+def radians(start_pos, end_pos):
+    """Get angle in radians of line from point to point."""
+    y_change = 1 if end_pos[1] > start_pos[1] else -1
+    x_change = 1 if end_pos[0] > start_pos[0] else -1
+
+    if start_pos[0] == end_pos[0]: # vertical slope
+        return (y_change * math.pi) / 2
+    else:
+        slope = linear_slope(start_pos, end_pos)
+        extra_radians = \
+            0 if x_change == 1 \
+            else (1 if y_change == 1 else -1) * math.pi
+        return math.atan(slope) + extra_radians
+
+
 class Plotter(object, metaclass=abc.ABCMeta):
     """Abstract interface class that defines a plotter: an object that
     plots the position of an animated object based on elapsed time.
@@ -133,6 +162,7 @@ class LinearPlotter(XYFunctionPlotter):
         """Initializes LinearPlotter object.
         :param start_pos: Position tuple where plotting begins
         :param end_pos: Position tuple where plotting ends
+        :param duration_ms: Total length of animation in milliseconds.
         """
         XYFunctionPlotter.__init__(self, start_pos, end_pos, duration_ms)
 
@@ -164,10 +194,155 @@ class LinearPlotter(XYFunctionPlotter):
             def linear_function(elapsed_ms):
                 return (slope * elapsed_ms) + start_value
         else:
-            def linear_function(elapse_ms):
+            def linear_function(elapsed_ms):
                 return end_value
 
         return linear_function
+
+
+class LinearToSpiralPlotter(XYFunctionPlotter):
+    """Plots animation in two parts: first a line from the start towards
+    the end, but skewed to the left or right, and second, an Archimedean
+    spiral from the line endpoint in to the final destination.
+    """
+    def __init__(self, start_pos, end_pos, duration_ms, line_duration_ms,
+                 spiral_radius, revolutions, is_clockwise=True):
+        """Initializes LinearToSpiralPlotter object.
+        :param start_pos: Position tuple where plotting begins
+        :param end_pos: Position tuple where plotting ends
+        :param duration_ms: Total length of animation in milliseconds.
+        :param line_duration_ms: Length of time in ms spent on linear approach
+            to spiral. Deducted from duration_ms.
+        :param spiral_radius: Outer radius of spiral.
+        :param revolutions: Approximate number of revolutions in the spiral.
+        :param is_clockwise bool: Whether spiral goes clockwise (otherwise,
+            it goes counter-clockwise.)
+        """
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.duration_ms = duration_ms
+        self.line_duration_ms = line_duration_ms
+        self.spiral_radius = spiral_radius
+        self.revolutions = revolutions
+        self.spiral_dir = -1 if is_clockwise else 1
+        # theta_direct: direct line angle (opposite of approach)
+        self.theta_direct = radians(start_pos, end_pos)
+        # theta_spiral_start: angle where inward spiral should begin.
+        #   90 degrees clockwise or counter-clockwise from angle of approach.
+        self.theta_spiral_start = \
+            self.theta_direct + (self.spiral_dir * (math.pi/2))
+        self.spiral_start_pos = self.get_spiral_start_pos()
+        self.linear_approach_plotter = \
+            LinearPlotter(start_pos, self.spiral_start_pos, line_duration_ms)
+        # theta_full_spiral: radians for full spiral travel from start to 
+        #   center point, including all revolutions.
+        self.theta_full_spiral = \
+            (self.theta_direct + (math.pi/2)) \
+            + (2 * math.pi * revolutions)
+        self.velocity = spiral_radius / self.theta_full_spiral
+        # theta_modifier: component of plot functions that is a little
+        #   different if going clockwise vs counter-clockwise.
+        self.theta_modifier = \
+            0 if self.spiral_dir == 1 \
+            else -2 * self.theta_spiral_start
+        XYFunctionPlotter.__init__(self, start_pos, end_pos, duration_ms)
+
+    def get_spiral_start_pos(self):
+        """Position at which the spiral begins."""
+        x = \
+            (self.spiral_radius * math.cos(self.theta_spiral_start)) \
+            + self.end_pos[0]
+        y = \
+            (self.spiral_radius * math.sin(self.theta_spiral_start)) \
+            + self.end_pos[1]
+        return x,y
+
+    def get_spiral_x_function(self):
+        g = self.spiral_dir
+        v = self.velocity
+        th_mod = self.theta_modifier
+        d = self.duration_ms
+        c = 0 # offset from center - should be 0
+        w = 1 # angular velocity
+        th = self.theta_full_spiral
+
+        def x_function(t):
+            return \
+                (
+                    g \
+                    * (((v * (d-t) * th) / d) + c)
+                    * math.cos(((w * (d-t) * th) / d) + th_mod)
+                ) \
+                + self.end_pos[0]
+
+        return x_function
+
+    def get_spiral_y_function(self):
+        v = self.velocity
+        th_mod = self.theta_modifier
+        d = self.duration_ms
+        c = 0 # offset from center - should be 0
+        w = 1 # angular velocity
+        th = self.theta_full_spiral
+
+        def y_function(t):
+            return \
+                (
+                    (((v * (d-t) * th) / d) + c)
+                    * math.sin(((w * (d-t) * th) / d) + th_mod)
+                ) \
+                + self.end_pos[1]
+
+        return y_function
+
+    def get_x_function(self):
+        """Return function that plots line-to-spiral as a function of time.
+
+        :param elapsed_ms: the number of milliseconds elapsed since start of animation.
+        :return: lambda function that takes elapsed_ms and maps to x position.
+        """
+        if self.duration_ms > 0:
+            linear_x_function = self.linear_approach_plotter.get_x_function()
+            spiral_x_function = self.get_spiral_x_function()
+            
+            def x_function(elapsed_ms):
+                if elapsed_ms <= self.line_duration_ms:
+                    # Still in the linear approach part of the plot.
+                    return linear_x_function(elapsed_ms)
+                else:
+                    return spiral_x_function(elapsed_ms - self.line_duration_ms)
+
+            return x_function
+        else:
+            def x_function(elapsed_ms):
+                return self.end_pos[0]
+
+            return x_function
+
+    def get_y_function(self):
+        """Return function that plots line-to-spiral as a function of time.
+
+        :param elapsed_ms: the number of milliseconds elapsed since start of animation.
+        :return: lambda function that takes elapsed_ms and maps to y position.
+        """
+        if self.duration_ms > 0:
+            linear_y_function = self.linear_approach_plotter.get_y_function()
+            spiral_y_function = self.get_spiral_y_function()
+
+            def y_function(elapsed_ms):
+                if elapsed_ms <= self.line_duration_ms:
+                    # Still in the linear approach part of the plot.
+                    return linear_y_function(elapsed_ms)
+                else:
+                    return spiral_y_function(elapsed_ms - self.line_duration_ms)
+
+            return y_function
+        else:
+            def y_function(elapsed_ms):
+                return self.end_pos[0]
+
+            return y_function
+
 
 
 class Animation(object, metaclass=abc.ABCMeta):

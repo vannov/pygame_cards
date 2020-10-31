@@ -60,5 +60,12 @@
 				"button_margin": 5
 			}
 		}
+	},
+	"crazy_8_spiral": {
+		"duration_ms": 2000,
+		"line_duration_ms": 200,
+		"spiral_radius": 50,
+		"revolutions": 2,
+		"is_clockwise": true
 	}
 }

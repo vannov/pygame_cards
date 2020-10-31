@@ -297,7 +297,26 @@ class Crazy8sController(controller.Controller):
             else:
                 if on_complete is not None: on_complete()
 
-        self.animate_cards([card_], self.discard.next_card_pos, on_complete=on_card_played)
+        card_.back_up = False
+        self.animate_cards([card_], self.discard.next_card_pos, 
+            plotter_fn=self.get_plotter_fn_for_card(card_),
+            on_complete=on_card_played)
+
+    def get_plotter_fn_for_card(self, card_):
+        if card_.rank == 8:
+            total_duration_ms = self.settings_json["crazy_8_spiral"]["duration_ms"]
+            line_duration_ms = self.settings_json["crazy_8_spiral"]["line_duration_ms"]
+            spiral_radius = self.settings_json["crazy_8_spiral"]["spiral_radius"]
+            revolutions = self.settings_json["crazy_8_spiral"]["revolutions"]
+            is_clockwise = self.settings_json["crazy_8_spiral"]["is_clockwise"]
+
+            def plotter_fn(start_pos, end_pos, _):
+                return animation.LinearToSpiralPlotter(start_pos, end_pos,
+                        total_duration_ms, line_duration_ms, spiral_radius, revolutions,
+                        is_clockwise)
+            return plotter_fn
+        else:
+            return None # Default plotter.
 
     def prompt_choose_suit(self):
         self.must_choose_suit = True
