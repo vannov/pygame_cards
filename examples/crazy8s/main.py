@@ -99,6 +99,8 @@ class Crazy8sController(controller.Controller):
         self.action_lock = False
         self.clear_status_notification()
         self.clear_player_prompt()
+        if self.bg_pulse_animation is not None:
+            self.bg_pulse_animation.is_completed = True
         self.start_game()
 
     def start_game(self):
@@ -417,11 +419,21 @@ class Crazy8sController(controller.Controller):
         threading.Timer(delay_ms / 1000, on_delay_complete).start()
 
     def game_over(self, winner_idx):
+        self.start_game_over_bgcolor_pulse_animation()
         message =\
             "You win!!" if winner_idx == 0\
             else f"{self.opponents[winner_idx-1].info.name} wins!!"
         self.show_status_notification(f"GAME OVER! {message}", color=(255,100,100))
         self.clear_dialog_title()
+
+    def start_game_over_bgcolor_pulse_animation(self):
+        """Start pulsing the background for game over."""
+        color1 = self.settings_json["gui"]["game_over_background"]["color1"]
+        color2 = self.settings_json["gui"]["game_over_background"]["color2"]
+        period_ms = self.settings_json["gui"]["game_over_background"]["period_ms"]
+
+        self.bg_pulse_animation = self.create_bgcolor_pulse_animation(color1, color2, period_ms)
+        self.add_animation(self.bg_pulse_animation)
 
     def clear_opponents(self):
         for i in range(0, len(self.opponents)):

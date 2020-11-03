@@ -62,6 +62,11 @@
 		},
 		"play_8_background": {
 			"period_ms": 700
+		},
+		"game_over_background": {
+			"color1": [255,150,150],
+			"color2": [150,255,150],
+			"period_ms": 2000
 		}
 	},
 	"crazy_8_spiral": {
