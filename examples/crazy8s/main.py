@@ -79,6 +79,7 @@ class Crazy8sController(controller.Controller):
         self.chosen_suit = None
         self.must_choose_suit = False
         self.action_lock = False
+        self.bg_pulse_animation = None
 
         # UI
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
@@ -297,6 +298,9 @@ class Crazy8sController(controller.Controller):
             else:
                 if on_complete is not None: on_complete()
 
+        if card_.rank == 8:
+            self.start_bgcolor_pulse_animation_for_8()
+
         card_.back_up = False
         self.animate_cards([card_], self.discard.next_card_pos, 
             plotter_fn=self.get_plotter_fn_for_card(card_),
@@ -317,6 +321,15 @@ class Crazy8sController(controller.Controller):
             return plotter_fn
         else:
             return None # Default plotter.
+
+    def start_bgcolor_pulse_animation_for_8(self):
+        """Start pulsing the background for playing a 8."""
+        color1 = self.settings_json["window"]["background_color"]
+        color2 = [180+randint(0,50), 180+randint(0,50), 180+randint(0,50)]
+        period_ms = self.settings_json["gui"]["play_8_background"]["period_ms"]
+
+        self.bg_pulse_animation = self.create_bgcolor_pulse_animation(color1, color2, period_ms)
+        self.add_animation(self.bg_pulse_animation)
 
     def prompt_choose_suit(self):
         self.must_choose_suit = True
@@ -360,6 +373,7 @@ class Crazy8sController(controller.Controller):
         self.hide_choose_suit_dialog()
         suit = suit_info[new_suit]
         self.show_dialog_title(f"Suit is {suit.name}")
+        self.bg_pulse_animation.is_completed = True
         self.next_turn()
         self.action_lock = False
 
@@ -478,6 +492,21 @@ class Crazy8sController(controller.Controller):
                 self.draw_card_from_stockpile(on_complete)
         else:
             self.show_player_prompt("It's not your turn!")
+
+    def create_bgcolor_pulse_animation(self, color1, color2, period_ms):
+        """Set up animation to pulse the background between given colors.
+        :param color1 Tuple(int, int, int): First color to pulse between.
+        :param color2 Tuple(int, int, int): Second color to pulse between.
+        :param period_ms int: Pulse period in milliseconds.
+        """
+
+        def set_color(color):
+            self.background_color = color
+
+        def on_complete():
+            self.background_color = None
+
+        return animation.ColorPulseAnimation(color1, color2, period_ms, set_color, on_complete)
 
 
 def main():

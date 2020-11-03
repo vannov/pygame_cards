@@ -59,6 +59,9 @@
 				"button_size": [30, 25],
 				"button_margin": 5
 			}
+		},
+		"play_8_background": {
+			"period_ms": 700
 		}
 	},
 	"crazy_8_spiral": {
