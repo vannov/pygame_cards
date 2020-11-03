@@ -10,8 +10,7 @@ except ImportError as err:
 
 
 class Controller(object, metaclass=abc.ABCMeta):
-    """ Abstract interface class 
-    that controls game logic and handles user events,
+    """ Abstract interface class that controls game logic and handles user events,
         Should be inherited by concrete game controller classes.
 
         Following methods are mandatory for all classes that derive from Controller:
