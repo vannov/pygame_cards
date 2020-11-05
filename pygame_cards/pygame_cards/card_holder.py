@@ -65,7 +65,7 @@ class CardsHolder(game_object.GameObject):
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
         :return: True if holder is clicked, False otherwise
         """
-        if len(self.cards) is not 0:
+        if len(self.cards) != 0:
             # Check if any card clicked.
             return any(card_.is_clicked(pos) for card_ in self.cards)
         else:
@@ -81,7 +81,7 @@ class CardsHolder(game_object.GameObject):
         :param pos: tuple with coordinates (x, y) - position of mouse click/screen touch.
         :return: True if top card is clicked, False otherwise
         """
-        return len(self.cards) is not 0 and self.cards[-1].is_clicked(pos)
+        return len(self.cards) != 0 and self.cards[-1].is_clicked(pos)
 
     def try_grab_card_at(self, pos):
         """ Tries to grab a card (or multiple cards) at given screen position.
@@ -151,7 +151,7 @@ class CardsHolder(game_object.GameObject):
         if isinstance(card_, card.Card):
             if on_top:
                 pos_ = self.pos
-                if len(self.cards) is not 0:
+                if len(self.cards) != 0:
                     length = len(self.cards)
                     pos_ = (self.pos[0] + length * self.offset[0],
                             self.pos[1] + length * self.offset[1])
