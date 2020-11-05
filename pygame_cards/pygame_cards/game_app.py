@@ -168,7 +168,7 @@ class GameApp(object, metaclass=abc.ABCMeta):
             :param id_: string with unique ID of GUI element
             """
             for element in self.gui_list:
-                if hasattr(element, "id") and element.id_ == id_:
+                if hasattr(element, "id_") and element.id_ == id_:
                     self.gui_list.remove(element)
                     break
 
@@ -191,10 +191,11 @@ class GameApp(object, metaclass=abc.ABCMeta):
             """ Destroys all elements in the gui_list. """
             self.gui_list = []
 
-    def __init__(self, json_path, game_controller=None):
+    def __init__(self, json_path, controller_cls=None, **kwargs):
         """
         :param json_path: path to configuration json file
-        :param game_controller: object of Controller class
+        :param controller_cls: Controller class
+        :param kwargs: passed to __init__ of controller_cls
         """
         # Windows properties that will be set in load_settings_from_json()
         self.title = None
@@ -215,11 +216,15 @@ class GameApp(object, metaclass=abc.ABCMeta):
         self.stopped = False
         self.mouse_timestamp = None  # Used for double click calculation
         self.gui_interface = GameApp.GuiInterface(self.screen)
-        if isinstance(game_controller, controller.Controller):
-            self.game_controller = game_controller
-            self.game_controller.gui_interface = self.gui_interface
-            self.game_controller.settings_json = self.settings_json
-            self.game_controller.build_objects()
+        if controller_cls is not None:
+            controller_kwargs = {
+                'gui_interface': self.gui_interface,
+                'settings_json': self.settings_json,
+            }
+            controller_kwargs.update(kwargs)
+            self.game_controller = controller_cls(**controller_kwargs)
+        else:
+            self.game_controller = None
 
     def is_double_click(self):
         if self.mouse_timestamp is None:
@@ -281,9 +286,21 @@ class GameApp(object, metaclass=abc.ABCMeta):
 
     def render(self):
         """ Renders game objects and gui elements """
-        pygame.draw.rect(self.screen, self.background_color, (0, 0, self.size[0], self.size[1]))
+        # Allow game controller to override background color.
+        background_color = self.background_color
+        if self.game_controller is not None:
+            if hasattr(self.game_controller, 'background_color'):
+                if self.game_controller.background_color is not None:
+                    background_color = self.game_controller.background_color
+
+        # Draw background
+        pygame.draw.rect(self.screen, background_color, (0, 0, self.size[0], self.size[1]))
+
+        # Render game controller elements.
         if self.game_controller is not None:
             self.game_controller.render_objects(self.screen)
+
+        # Render GUI elements.
         if self.gui_interface is not None:
             self.gui_interface.render()
 

@@ -35,7 +35,6 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def __init__(self, pos):
         self.rect = [pos[0], pos[1], 0, 0]
         self.mouse_offset = [0, 0]
-        self.clicked = False
         self.image = None  # Placeholder for card sprite
 
     @property
@@ -54,13 +53,7 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def get_rect(self):
         return self.image.get_rect()
 
-    def update(self):
-        if self.clicked:
-            self.rect[0] = pygame.mouse.get_pos()[0] - self.mouse_offset[0]
-            self.rect[1] = pygame.mouse.get_pos()[1] - self.mouse_offset[1]
-
     def render(self, screen):
-        self.update()
         screen.blit(*self.get_render_tuple())
 
     def get_render_tuple(self):
@@ -69,16 +62,6 @@ class AbstractPygameCardSprite(pygame.sprite.Sprite):
     def is_clicked(self, pos):
         return (pos[0] > self.rect[0] and pos[0] < (self.rect[0] + self.get_rect()[2]) and
                 pos[1] > self.rect[1] and pos[1] < (self.rect[1] + self.get_rect()[3]))
-
-    def check_mouse(self, pos, down):
-        if self.is_clicked(pos):
-            if isinstance(down, bool):
-                self.clicked = down
-            self.mouse_offset[0] = pos[0] - self.rect[0]
-            self.mouse_offset[1] = pos[1] - self.rect[1]
-            return True
-        else:
-            return False
 
     def check_card_collide(self, sprite):
         rect = pygame.Rect(self.rect)
@@ -123,8 +106,13 @@ class CardSprite(AbstractPygameCardSprite):
         else:
             return self.image, (self.rect[0], self.rect[1])
 
-    def flip(self):
-        self.back_up = not self.back_up
+    @property
+    def back_up(self):
+        return self._back_up
+
+    @back_up.setter
+    def back_up(self, value):
+        self._back_up = value
 
     @staticmethod
     def get_image_path(suit, rank):
@@ -173,73 +161,3 @@ class CardSprite(AbstractPygameCardSprite):
             path += ".png"
 
         return path
-
-# class CardBackSprite(AbstractPygameCardSprite):
-#     def __init__(self, pos):
-#         AbstractPygameCardSprite.__init__(self, pos)
-#         back_img_path = "img/back-side.png"
-#         temp_image = pygame.image.load(load_img(back_img_path)).convert()
-#         #w = temp_image.get_rect()[2]
-#         #h = temp_image.get_rect()[3]
-#         self.image = pygame.transform.scale(temp_image, globals.Size.card)
-
-
-class SpriteMove(object):
-    """
-    Class that animates a card move. Can be used to animate automatic cards' moves,
-    for example during cards dealing.
-    """
-    def __init__(self, sprites, dest_pos, speed=None):
-        """ Initializes an object of SpriteMove class.
-        :param sprites: list of card sprites to be moved
-        :param dest_pos: tuple with coordinates (x,y) of destination position
-        :param speed: integer number, on how many pixels card(s) should move per frame.
-                    If not specified (None), "move_speed" value from the config json is used.
-        """
-        self.sprites = sprites
-        self.dest_pos = dest_pos
-        for sprite in self.sprites:
-            sprite.start_pos = sprite.pos
-            sprite.angle = math.atan2(dest_pos[1] - sprite.start_pos[1],
-                                      dest_pos[0] - sprite.start_pos[0])
-            sprite.distance = SpriteMove.calc_distance(dest_pos, sprite.start_pos)
-            if speed is None:
-                sprite.speed = CardSprite.card_json["move_speed"]
-            else:
-                sprite.speed = speed
-            sprite.completed = False
-
-    @staticmethod
-    def calc_distance(point1, point2):
-        """ Calculates distance between two points.
-        :param point1: tuple (x, y) with coordinates of the first point
-        :param point2: tuple (x, y) with coordinates of the second point
-        :return: distance between two points in pixels
-        """
-        return math.sqrt(math.pow(point1[0] - point2[0], 2) + math.pow(point1[1] - point2[1], 2))
-
-    def update(self):
-        """
-        Updates sprite(s) position. IMPORTANT: this method should be executed in an endless loop
-        during all lifetime of SpriteMove object in order for animation to be smooth.
-        :return: True is move to destination position is completed, otherwise returns False.
-        """
-        for sprite in self.sprites:
-            new_pos = (sprite.pos[0] + sprite.speed * math.cos(sprite.angle),
-                       sprite.pos[1] + sprite.speed * math.sin(sprite.angle))
-            distance = SpriteMove.calc_distance(new_pos, sprite.start_pos)
-            if distance < sprite.distance:
-                sprite.pos = new_pos
-            else:
-                sprite.pos = self.dest_pos
-                sprite.completed = True
-
-    def is_completed(self):
-        """
-        Checks if animation is completed.
-        :return: True is sprite(s) reached the destination point. False otherwise.
-        """
-        result = True
-        for sprite in self.sprites:
-            result = result and sprite.completed
-        return result

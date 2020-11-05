@@ -16,8 +16,16 @@ class Card(game_object.GameObject):
         self.suit = suit
         self.rank = rank
         self.sprite = card_sprite.CardSprite(suit, rank, pos, back_up)
-        #self.back_sprite = card_sprite.CardBackSprite(pos)
-        self.back_up = back_up
+        self._back_up = back_up
+
+    @property
+    def back_up(self):
+        return self._back_up
+
+    @back_up.setter
+    def back_up(self, value):
+        self._back_up = value
+        self.sprite.back_up = self._back_up
 
     def get_sprite(self):
         """ Returns card's spite object
@@ -37,7 +45,6 @@ class Card(game_object.GameObject):
     def flip(self):
         """ Flips the card from face-up to face-down and vice versa """
         self.back_up = not self.back_up
-        self.sprite.flip()
 
     def is_clicked(self, pos):
         """ Checks if mouse click is on card
@@ -45,19 +52,6 @@ class Card(game_object.GameObject):
         :return: True if card is clicked, False otherwise
         """
         return self.sprite.is_clicked(pos)
-
-    def unclick(self):
-        """ Marks card as unclicked, i.e. it won't stick to the mouse cursor """
-        self.sprite.clicked = False
-
-    def check_mouse(self, pos, down):
-        """ Checks if mouse event affects the card and if so processes the event.
-        :param pos: tuple with coordinates of mouse event (x, y)
-        :param down: boolean, should be True for mouse down event, False for mouse up event
-        :return: True if passed mouse event affects the card, False otherwise.
-
-        """
-        return self.sprite.check_mouse(pos, down)
 
     def check_collide(self, card_=None, pos=None):
         """ Checks if current card's sprite collides with other card's sprite, or with
@@ -70,6 +64,9 @@ class Card(game_object.GameObject):
             return self.sprite.check_card_collide(card_.sprite)
         elif pos is not None:
             return self.sprite.check_area_collide(pos)
+
+    def get_pos(self):
+        return self.sprite.pos
 
     def set_pos(self, pos):
         """ Sets position of the card's sprite

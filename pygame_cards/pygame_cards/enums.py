@@ -44,8 +44,9 @@ class DeckType:
 class GrabPolicy:
     """ Enums for different grab policies of cards' holders."""
     no_grab = 0,
-    can_single_grab = 1,
-    can_multi_grab = 2
+    can_single_grab = 1,    # Grab top card
+    can_multi_grab = 2,     # Grab top N cards
+    can_single_grab_any = 3 # Grab single card at any position
 
 
 def get_suit_string_from_enum(suit):

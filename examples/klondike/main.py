@@ -4,7 +4,7 @@ try:
     import os
     import pygame
 
-    from pygame_cards import game_app, controller, deck, card_holder, enums
+    from pygame_cards import game_app, controller, deck, card_holder, enums, animation
     import holders
 except ImportError as err:
     print("Fail loading a module in file:", __file__, "\n", err)
@@ -14,14 +14,14 @@ except ImportError as err:
 class KlondikeController(controller.Controller):
 
     def restart_game(self):
-        self.custom_dict["deck_discard"].move_all_cards(self.custom_dict["deck"])
-        self.custom_dict["stack"].move_all_cards(self.custom_dict["deck"])
+        self.deck_discard.move_all_cards(self.deck)
+        self.stack.move_all_cards(self.deck)
 
-        for foundation in self.custom_dict["foundations"]:
-            foundation.move_all_cards(self.custom_dict["deck"])
+        for foundation in self.foundations:
+            foundation.move_all_cards(self.deck)
 
-        for pile in self.custom_dict["piles"]:
-            pile.move_all_cards(self.custom_dict["deck"])
+        for pile in self.piles:
+            pile.move_all_cards(self.deck)
 
         if isinstance(self.gui_interface, game_app.GameApp.GuiInterface):
             self.gui_interface.hide_by_id("win_label1")
@@ -30,40 +30,41 @@ class KlondikeController(controller.Controller):
 
     def start_game(self):
 
-        self.custom_dict["deck"].shuffle()
+        self.deck.shuffle()
         #self.deal_cards()
 
         for i in range(1, 8):
             for j in range(0, i):
-                card_ = self.custom_dict["deck"].pop_top_card()
+                card_ = self.deck.pop_top_card()
                 if j == i - 1:
                     card_.flip()
 
-                self.custom_dict["piles"][i-1].add_card(card_)
+                self.piles[i-1].add_card(card_)
 
-        self.custom_dict["game_start_time"] = pygame.time.get_ticks()
+        self.game_start_time = pygame.time.get_ticks()
 
-    def build_objects(self):
+    def __init__(self, objects_list=None, gui_interface=None, settings_json=None):
+        super(KlondikeController, self).__init__(objects_list, gui_interface, settings_json)
+
         setattr(deck.Deck, "render", holders.draw_empty_card_pocket)
 
         deck_pos = self.settings_json["deck"]["position"]
         deck_offset = self.settings_json["deck"]["offset"]
-        self.custom_dict["deck"] = deck.Deck(enums.DeckType.full, deck_pos, deck_offset, None)
+        self.deck = deck.Deck(enums.DeckType.full, deck_pos, deck_offset, None)
 
-        self.custom_dict["deck_discard"] = holders.DeckDiscard()
+        self.deck_discard = holders.DeckDiscard()
 
-        deck_pos = self.custom_dict["deck"].pos
+        deck_pos = self.deck.pos
         x_offset = self.settings_json["stack"]["deck_offset"][0] \
                    + self.settings_json["card"]["size"][0]
         y_offset = self.settings_json["stack"]["deck_offset"][1]
         stack_pos = deck_pos[0] + x_offset, deck_pos[1] + y_offset
         stack_offset = self.settings_json["stack"]["inner_offset"]
-        self.custom_dict["stack"] = card_holder.CardsHolder(stack_pos, stack_offset,
-                                                            enums.GrabPolicy.can_single_grab)
+        self.stack = card_holder.CardsHolder(stack_pos, stack_offset, enums.GrabPolicy.can_single_grab)
 
-        self.add_rendered_object((self.custom_dict["deck"], self.custom_dict["stack"]))
+        self.add_rendered_object((self.deck, self.stack))
 
-        self.custom_dict["piles"] = []
+        self.piles = []
         pile_pos = self.settings_json["pile"]["position"]
         pile_offset = self.settings_json["pile"]["offset"]
         pile_inner_offset = self.settings_json["pile"]["inner_offset"]
@@ -71,30 +72,31 @@ class KlondikeController(controller.Controller):
             pile = holders.Pile(pile_pos, pile_inner_offset, enums.GrabPolicy.can_multi_grab)
             pile_pos = pile_pos[0] + pile_offset[0], pile_pos[1] + pile_offset[1]
             self.add_rendered_object(pile)
-            self.custom_dict["piles"].append(pile)
+            self.piles.append(pile)
 
         foundation_pos = self.settings_json["foundation"]["position"]
         foundation_offset = self.settings_json["foundation"]["offset"]
         foundation_inner_offset = self.settings_json["foundation"]["inner_offset"]
-        self.custom_dict["foundations"] = []
+        self.foundations = []
         for i in range(0, 4):
-            self.custom_dict["foundations"].append(holders.Foundation(foundation_pos,
-                                                                      foundation_inner_offset))
+            self.foundations.append(holders.Foundation(foundation_pos, foundation_inner_offset))
             foundation_pos = (foundation_pos[0] + foundation_offset[0],
                               foundation_pos[1] + foundation_offset[1])
-            self.add_rendered_object(self.custom_dict["foundations"][i])
+            self.add_rendered_object(self.foundations[i])
 
-        self.custom_dict["grabbed_cards_holder"] = holders.GrabbedCardsHolder((0, 0),
-                                                                              pile_inner_offset)
-        self.add_rendered_object(self.custom_dict["grabbed_cards_holder"])
-        self.custom_dict["owner_of_grabbed_card"] = None
+        self.grabbed_cards_holder = card_holder.GrabbedCardsHolder((0, 0),\
+                                        pile_inner_offset)
+        self.add_rendered_object(self.grabbed_cards_holder)
+        self.owner_of_grabbed_card = None
 
         self.gui_interface.show_button(self.settings_json["gui"]["restart_button"],
                                        self.restart_game, "Restart")
 
+        self.game_start_time = None
+
     def check_win(self):
         win = True
-        for found in self.custom_dict["foundations"]:
+        for found in self.foundations:
             if len(found.cards) > 0 and found.cards[-1].rank == enums.Rank.king:
                 continue
             else:
@@ -109,8 +111,8 @@ class KlondikeController(controller.Controller):
         size = self.settings_json["gui"]["win_text_size"]
         self.gui_interface.show_label(position=pos, text=text, text_size=size, timeout=0,
                                       id_="win_label1")
-        if hasattr(self, "game_start_time") and self.custom_dict["game_start_time"] is not None:
-            total_seconds = (pygame.time.get_ticks() - self.custom_dict["game_start_time"])/1000
+        if self.game_start_time is not None:
+            total_seconds = (pygame.time.get_ticks() - self.game_start_time)/1000
             minutes = str(total_seconds / 60)
             seconds = str(total_seconds % 60)
             if len(seconds) == 1:
@@ -133,84 +135,112 @@ class KlondikeController(controller.Controller):
             self.process_double_click(pos)
 
     def process_mouse_down(self, pos):
-        if self.custom_dict["deck"].is_clicked(pos):
+        if self.deck.is_clicked(pos):
             self.process_deck_click()
             return
 
-        if len(self.custom_dict["grabbed_cards_holder"].cards) == 0:
+        if len(self.grabbed_cards_holder.cards) == 0:
             for obj in self.rendered_objects:
-                grabbed_cards = obj.try_grab_card(pos)
+                (grabbed_cards, mouse_offset) = obj.try_grab_card_at(pos)
                 if grabbed_cards is not None:
+                    self.grabbed_cards_holder.mouse_offset = mouse_offset
                     for card_ in grabbed_cards:
-                        self.custom_dict["grabbed_cards_holder"].add_card(card_)
-                    self.custom_dict["owner_of_grabbed_card"] = obj
+                        self.grabbed_cards_holder.add_card(card_)
+                    self.owner_of_grabbed_card = obj
                     break
 
     def process_mouse_up(self, pos):
-        if len(self.custom_dict["grabbed_cards_holder"].cards) > 0:
+        if len(self.grabbed_cards_holder.cards) > 0:
+            # Start by assuming cards will float back to original holder.
+            target_holder = self.owner_of_grabbed_card
+            dropped_cards = False
+            
+            # First, check to see if held cards are being dropped on a valid
+            # destination.
             for obj in self.rendered_objects:
-                dropped_cards = False
                 if hasattr(obj, "can_drop_card") and hasattr(obj, "check_collide"):
-                    if (obj.check_collide(self.custom_dict["grabbed_cards_holder"].cards[0]) and
-                            obj.can_drop_card(self.custom_dict["grabbed_cards_holder"].cards[0])):
+                    if (obj.check_collide(self.grabbed_cards_holder.cards[0]) and
+                            obj.can_drop_card(self.grabbed_cards_holder.cards[0])):
                         dropped_cards = True
-                        while len(self.custom_dict["grabbed_cards_holder"].cards) != 0:
-                            obj.add_card(self.custom_dict["grabbed_cards_holder"].pop_bottom_card())
+                        target_holder = obj
                         break
-            if self.custom_dict["owner_of_grabbed_card"] is not None:
-                while len(self.custom_dict["grabbed_cards_holder"].cards) != 0:
-                    self.custom_dict["owner_of_grabbed_card"].add_card(
-                        self.custom_dict["grabbed_cards_holder"].pop_bottom_card())
-                if dropped_cards:
-                    if isinstance(self.custom_dict["owner_of_grabbed_card"], holders.Pile):
-                        self.custom_dict["owner_of_grabbed_card"].open_top_card()
-                    elif isinstance(self.custom_dict["owner_of_grabbed_card"], holders.Foundation):
-                        self.check_win()
-                self.custom_dict["owner_of_grabbed_card"] = None
-                _ = pos
+
+            if target_holder is not None:
+                # Identified a destination for grabbed cards to float to.
+                self_ = self
+                def drop_cards(holder_):
+                    while len(holder_.cards) != 0:
+                        target_holder.add_card(holder_.pop_bottom_card())
+                    if isinstance(target_holder, holders.Foundation):
+                        self_.check_win()
+
+                    if self.owner_of_grabbed_card is not None:
+                        if dropped_cards:
+                            if isinstance(self_.owner_of_grabbed_card, holders.Pile):
+                                self_.owner_of_grabbed_card.open_top_card()
+                        self_.owner_of_grabbed_card = None
+                        _ = pos
+
+                # Check if cards far enough away to animate.
+                drop_distance = animation.distance(\
+                    self.grabbed_cards_holder.pos,\
+                    target_holder.next_card_pos)
+                if drop_distance > 15:
+                    cards = self.grabbed_cards_holder.pop_all_cards()
+                    self.animate_cards(cards, target_holder.next_card_pos,\
+                        on_complete=drop_cards)
+                else:
+                    # Drop distance short. Do not animate. It might mess
+                    # with double click event handler.
+                    drop_cards(self.grabbed_cards_holder)
 
     def process_deck_click(self):
-        while len(self.custom_dict["stack"].cards) != 0:
-            card_ = self.custom_dict["stack"].pop_bottom_card()
+        while len(self.stack.cards) != 0:
+            card_ = self.stack.pop_bottom_card()
             if card_ is not None:
                 card_.flip()
-                self.custom_dict["deck_discard"].add_card(card_)
+                self.deck_discard.add_card(card_)
 
-        if len(self.custom_dict["deck"].cards) == 0:
-            if len(self.custom_dict["deck_discard"].cards) == 0:
+        if len(self.deck.cards) == 0:
+            if len(self.deck_discard.cards) == 0:
                 return  # Cards in Deck ended
             else:
-                self.custom_dict["deck_discard"].move_all_cards(self.custom_dict["deck"])
+                self.deck_discard.move_all_cards(self.deck)
                 return  # Not drawing cards to stack when flipped the deck
 
         for i in range(0, 3):
-            card_ = self.custom_dict["deck"].pop_top_card()
+            card_ = self.deck.pop_top_card()
             if card_ is None:
                 break
             card_.flip()
-            self.custom_dict["stack"].add_card(card_)
+            self.stack.add_card(card_)
             _ = i
 
     def process_double_click(self, pos):
-        search_list = self.custom_dict["piles"] + [self.custom_dict["stack"]]
+        search_list = self.piles + [self.stack]
         for holder in search_list:
-            if len(holder.cards) != 0 and holder.is_clicked(pos):
+            if holder.is_top_card_clicked(pos):
                 card_ = holder.cards[-1]
-                for found in self.custom_dict["foundations"]:
+                for found in self.foundations:
                     if found.can_drop_card(card_):
                         card_ = holder.pop_top_card()
-                        self.add_move([card_], found.pos)  # animate card move to foundation
-                        found.add_card(card_)
-                        self.check_win()
-                        if isinstance(holder, holders.Pile):
-                            holder.open_top_card()
+                        self_ = self
+
+                        def on_float_complete(float_holder):
+                            found.add_card(float_holder.pop_top_card())
+                            self_.check_win()
+                            if isinstance(holder, holders.Pile):
+                                holder.open_top_card()
+
+                        self.animate_cards([card_], found.next_card_pos,\
+                            on_complete=on_float_complete)
                         break
                 break
 
 
 def main():
     json_path = os.path.join(os.getcwd(), 'settings.json')
-    klondike_app = game_app.GameApp(json_path=json_path, game_controller=KlondikeController())
+    klondike_app = game_app.GameApp(json_path=json_path, controller_cls=KlondikeController)
     klondike_app.execute()
 
 if __name__ == '__main__':

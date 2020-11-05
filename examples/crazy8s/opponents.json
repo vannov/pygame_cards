@@ -1,0 +1,110 @@
+[
+    {
+        "name": "Chester",
+        "methods": {
+            "suit": 42,
+            "rank": 28,
+            "eight": 27,
+            "random": 3
+        }
+    },
+    {
+        "name": "Raz",
+        "methods": {
+            "suit": 13,
+            "rank": 52,
+            "eight": 11,
+            "random": 24
+        }
+    },
+    {
+        "name": "Katalina",
+        "methods": {
+            "suit": 92,
+            "rank": 4,
+            "eight": 2,
+            "random": 2
+        }
+    },
+    {
+        "name": "Yaling",
+        "methods": {
+            "suit": 43,
+            "rank": 44,
+            "eight": 4,
+            "random": 9
+        }
+    },
+    {
+        "name": "Akbar",
+        "methods": {
+            "suit": 16,
+            "rank": 73,
+            "eight": 8,
+            "random": 3
+        }
+    },
+    {
+        "name": "Robin",
+        "methods": {
+            "suit": 4,
+            "rank": 40,
+            "eight": 51,
+            "random": 5
+        }
+    },
+    {
+        "name": "Minah",
+        "methods": {
+            "suit": 35,
+            "rank": 2,
+            "eight": 10,
+            "random": 53
+        }
+    },
+    {
+        "name": "Tumelo",
+        "methods": {
+            "suit": 21,
+            "rank": 72,
+            "eight": 2,
+            "random": 5
+        }
+    },
+    {
+        "name": "Deirdre",
+        "methods": {
+            "suit": 7,
+            "rank": 25,
+            "eight": 35,
+            "random": 33
+        }
+    },
+    {
+        "name": "Wilhelm",
+        "methods": {
+            "suit": 56,
+            "rank": 10,
+            "eight": 22,
+            "random": 12
+        }
+    },
+    {
+        "name": "Lisanne",
+        "methods": {
+            "suit": 12,
+            "rank": 13,
+            "eight": 57,
+            "random": 18
+        }
+    },
+    {
+        "name": "Prakash",
+        "methods": {
+            "suit": 80,
+            "rank": 8,
+            "eight": 6,
+            "random": 6
+        }
+    }
+]

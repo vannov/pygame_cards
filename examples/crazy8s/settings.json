@@ -1,0 +1,79 @@
+{
+	"window": {
+		"size": [770, 480],
+		"title": "Crazy Eights",
+		"background_color": [25, 217, 255]
+	},
+	"card": {
+		"size": [65, 85],
+		"front_sprite_path": "img/cards/",
+		"back_sprite_file": "img/back-side.png",
+		"move_speed": 1000
+	},
+	"stockpile": {
+		"position": [293, 212],
+		"offset": [0, 0]
+	},
+	"discard": {
+		"position": [381, 212],
+		"offset": [0, 0]
+	},
+	"player_hand": {
+		"position": [204, 350],
+		"offset": [15, 0]
+	},
+	"opponent_hand": {
+		"name": {
+			"position_y": 8,
+			"text_size": 18,
+			"text_color": [0,0,255]
+		},
+		"position_y": 32,
+		"x_range": [25, 744],
+		"offset": [2, 1]
+	},
+	"opponent_behavior": {
+		"min_delay_ms": 1100,
+		"max_delay_ms": 2500
+	},
+	"gui": {
+		"restart_button": [28, 416, 50, 25],
+		"message": {
+			"position": [458, 150],
+			"text_size": 18,
+			"text_color": [0, 0, 0]
+		},
+		"player_prompt": {
+			"position": [210, 454],
+			"text_size": 18,
+			"text_color": [255,0,0]
+		},
+		"dialog": {
+			"title": {
+				"position": [463, 187],
+				"text_size": 18,
+				"text_color": [0, 0, 0]
+			},
+			"content": {
+				"position": [473, 223],
+				"button_size": [30, 25],
+				"button_margin": 5
+			}
+		},
+		"play_8_background": {
+			"period_ms": 700
+		},
+		"game_over_background": {
+			"color1": [255,150,150],
+			"color2": [150,255,150],
+			"period_ms": 2000
+		}
+	},
+	"crazy_8_spiral": {
+		"duration_ms": 2000,
+		"line_duration_ms": 200,
+		"spiral_radius": 50,
+		"revolutions": 2,
+		"is_clockwise": true
+	}
+}

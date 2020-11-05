@@ -4,13 +4,13 @@
 
 The package contains a set of modules that encapsulate Pygame routines and provide a simple API to create a card game with minimum amount of code.
 
-Check out the _examples_ folder - it contains implementation of classic "Klondike" solitaire. Here how the game looks like:
+Check out the _examples_ folder - it contains a few sample games, including an implementation of classic "Klondike" solitaire. Here's what the Klondike game looks like:
 
 <img src="https://github.com/vannov/pygame_cards/blob/master/examples/klondike/klondike.png" width="570" height="470"/>
 
 ## Installation 
 
-####Prerequisites:
+### Prerequisites:
 
 Python version 3.8.x: https://www.python.org/downloads/
 
@@ -18,7 +18,7 @@ Pygame version 1.9.x: http://www.pygame.org/download.shtml
 
 There is a known Pygame issue with OS X El Capitan and newer. Because of different versions of SDL_image library, images rendered in a Pygame application look corrupted. The workaround is to downgrade to an older version of SDL_image library. See instructions here: http://stackoverflow.com/a/35385411
 
-####Installation from redistributable:
+### Installation from redistributable:
 
 Download archive with latest available version of **pygame_cards** package from https://github.com/vannov/pygame_cards/releases. Install the package:
 
@@ -32,7 +32,8 @@ sudo pip install pygame_cards-0.1.tar.gz
 pip install pygame_cards-0.1.zip
 ```
 
-####Installation from sources:
+### Installation from sources
+
 To install the **pygame_cards** framework, download this repository, in terminal cd into _pygame_cards_ folder and run command:
 
 ```
@@ -84,32 +85,32 @@ If some or all of the mandatory fields are missing, the framework will use defau
 }
 ```
 
-### Controller class
+### `Controller` class
 
-Controller class from **controller.py** module in the framework is an abstract interface class that controls game logic and handles user events. Each project should contain a concrete class that derive from the Controller class.
+`Controller` class from **controller.py** module in the framework is an abstract interface class that controls game logic and handles user events. Each project should contain a concrete class that derive from the `Controller` class.
 
 An object of class derived from the Controller class has to be passed as an argument when GameApp object is created. See details about GameApp object below.
 
 Following methods are mandatory for all classes that derive from Controller:
-- build_objects	
-- start_game
-- process_mouse_events
+- `build_objects`
+- `start_game`
+- `process_mouse_events`
 
 Also these methods are not mandatory, but it can be helpful to define them:
-- execute_game
-- restart_game
-- cleanup
+- `execute_game`
+- `restart_game`
+- `cleanup`
 
-In your project you don't need to call these methods directly, they are called from high level GameApp class. See description of each method in the docstrings in **controller.py** module.
+In your project you don't need to call these methods directly, they are called from the high-level `GameApp` class. See description of each method in the docstrings in **controller.py** module.
 Other auxiliary methods can be added if needed and called from the mandatory methods.
 
-### GameApp class
+### `GameApp` class
 
-GameApp class controls the application flow and settings. An object of GameApp class has to be created in the entry point of your application (typically in the main() function). 
+`GameApp` class controls the application flow and settings. An object of `GameApp` class has to be created in the entry point of your application (typically in the main() function). 
 
 GameApp constructor takes 2 arguments:
-- **json_path**: path to JSON settings file
-- **game_controller**: object of class derived from Controller 
+- `json_path`: path to JSON settings file
+- `controller_cls`: class derived from Controller
 
 After a GameApp object is created, to start the game simply call execute() method.
 
@@ -117,9 +118,39 @@ Example of the main() method, assuming that there is definition of MyGameControl
 
 ```python
 def main():
-    solitaire_app = game_app.GameApp(json_path='settings.json', game_controller=MyGameController())
+    solitaire_app = game_app.GameApp(json_path='settings.json', controller_cls=MyGameController)
     solitaire_app.execute()
 ```
+
+### Card holders
+
+The `CardsHolder` class (found in the `card_holder` module) and its derivatives are the basic data structure for holding groups of cards and displaying them together.
+
+You can add cards, sort the cards, pop top or bottom cards, grab cards at a certain position (if the `grab_policy` attribute permits) and so forth.
+
+You can sub-class `CardsHolder` to create specific behavior for certain holders in your game (see `examples/klondike/holders.py` for some good examples.)
+
+The `Deck` class (in the `deck` module) is a sub-class of `CardsHolder` that comes prepopulated with a complete standard playing deck of cards. It is generally used to provide the cards used in any game.
+
+### Animation
+
+The `Controller` class has an `animations` property, which is a list of objects that fulfill the `Animation` abstract interface (see `animation` module.)
+
+An animation object can do almost anything; there is a hierarchy of useful classes:
+
+* `Animation` - Basic interface that all animations must follow.
+* `PositionAnimation` - Animation that will update the position of _anything_ (cards or something else...)
+* `CardsHolderAnimation` - Specifically for animating card holders (i.e. moving groups of cards around the screen.)
+* `ColorPulseAnimation` - For rhythmically pulsing the color of anything between two endpoint colors. The Crazy 8s and War sample games use this to pulse the background color of the window at certain points of the game.
+
+#### Plotters
+
+The position animation classes make use of `Plotter` classes to plot the trajectory of the object being animated. There are a few core plotter classes provided in the `animation` module:
+
+* `Plotter` - abstract interface class.
+* `XYFunctionPlotter` - abstract interface class for any plotter that uses parametric equations to plot X and Y coordinates as a function of T (or time in milliseconds).
+* `LinearPlotter` - animates object in a straight line from point A to B.
+* `LinearToSpiralPlotter` - a _fancy_ plotter that takes an object in a two-part trajectory: first, a straight line approaching the destination, then a spiral in to the final point. See Crazy 8s (try playing an 8!)
 
 ## Deployment
 

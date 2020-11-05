@@ -8,7 +8,6 @@ class MyGameController(controller.Controller):
     """ Main class that controls game logic and handles user events.
 
         Following methods are mandatory for all classes that derive from Controller:
-            - build_objects()
             - start_game()
             - process_mouse_events()
 
@@ -21,12 +20,6 @@ class MyGameController(controller.Controller):
         See details about each method below.
         Other auxiliary methods can be added if needed and called from the mandatory methods.
     """
-
-    def build_objects(self):
-        """ Create permanent game objects (deck of cards, players etc.) and GUI elements
-            in this method. This method is executed during creation of GameApp object.
-        """
-        pass
 
     def start_game(self):
         """ Put game initialization code here. For example: dealing of cards,
@@ -82,10 +75,10 @@ def main():
     # See how custom fields from JSON are used in mygame_examples.py
     json_path = os.path.join(os.getcwd(), 'settings.json')
 
-    # Create an instance of GameApp and pass a path to setting json file
-    # and an instance of custom Controller object.
-    # This will initialize the game, build_objects() from Controller will be called at this step.
-    solitaire_app = game_app.GameApp(json_path=json_path, game_controller=MyGameController())
+    # Create an instance of GameApp, passing a path to setting json file
+    # and a subclass of Controller. This will initialize the game,
+    # and instantiate the Controller.
+    solitaire_app = game_app.GameApp(json_path=json_path, controller_cls=MyGameController)
 
     # Start executing the game. This will call start_game() from Controller,
     # then will be calling execute_game() in an endless loop.
